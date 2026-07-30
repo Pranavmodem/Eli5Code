@@ -12,6 +12,8 @@ export default function Dashboard() {
   const startDate = useBootcamp((s) => s.startDate);
   const startJourney = useBootcamp((s) => s.startJourney);
   const resetProgress = useBootcamp((s) => s.resetProgress);
+  const authUser = useBootcamp((s) => s.authUser);
+  const authReady = useBootcamp((s) => s.authReady);
 
   const completed = hydrated ? completedLessons : [];
   const start = hydrated ? startDate : null;
@@ -28,6 +30,19 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-10">
+      {authReady && !authUser && (
+        <div className="card flex flex-wrap items-center justify-between gap-3 border-neon/40 p-4">
+          <p className="text-sm text-slate-300">
+            👋 You're browsing as a <strong>guest</strong> — you can try the sample
+            lessons, but the full 60-day journey needs a free account so progress
+            saves and syncs.
+          </p>
+          <div className="flex gap-2">
+            <Link href="/signup" className="btn-primary text-xs">Create free account</Link>
+            <Link href="/learn/oop/classes-blueprints" className="btn-ghost text-xs">Try the sample</Link>
+          </div>
+        </div>
+      )}
       {/* ---- header + strength meter ---- */}
       <section>
         <div className="mb-1 flex flex-wrap items-end justify-between gap-3">

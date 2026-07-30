@@ -1,9 +1,23 @@
 export type VisualizerKey =
-  | "bubble-sort"
+  | "blueprint"
+  | "objects"
+  | "capsule"
+  | "inheritance"
+  | "polymorphism"
+  | "abstraction"
+  | "array"
   | "linked-list"
   | "stack-queue"
+  | "tree"
+  | "hash-map"
+  | "bubble-sort"
+  | "merge-sort"
+  | "quick-sort"
   | "binary-search"
+  | "bfs"
+  | "dfs"
   | "big-o"
+  | "memory"
   | null;
 
 export interface Lesson {
@@ -57,7 +71,7 @@ export const modules: Module[] = [
           "A class is a user-defined type that bundles state (fields/properties) and behavior (methods) into a single unit. It defines the shape of data and the operations permitted on that data, but allocates no memory for instance data by itself.",
           "class House { constructor(color) { this.color = color; } ringDoorbell() { ... } } — the class declares members and a constructor, which runs at instantiation time to initialize per-instance state.",
         ],
-        visualizer: null,
+        visualizer: "blueprint",
       },
       {
         id: "objects-houses",
@@ -73,7 +87,7 @@ export const modules: Module[] = [
           "An object is an instance of a class: memory allocated at runtime holding that instance's field values, with methods dispatched through the class. `new House(\"blue\")` invokes the constructor and returns a reference to the new instance.",
           "Instances are independent: mutating `houseA.color` never affects `houseB.color`. Identity (the reference) is distinct from equality (comparing field values) — two houses can look identical yet be different objects in memory.",
         ],
-        visualizer: null,
+        visualizer: "objects",
       },
       {
         id: "encapsulation-capsule",
@@ -89,7 +103,7 @@ export const modules: Module[] = [
           "Encapsulation restricts direct access to an object's internal state, exposing behavior through a controlled public interface. Fields are marked private; reads/writes go through getters, setters, or intent-revealing methods that can validate invariants.",
           "Benefits: invariants can't be violated from outside (e.g. balance can never go negative if `withdraw()` checks it), and internals can be refactored freely as long as the public API is stable.",
         ],
-        visualizer: null,
+        visualizer: "capsule",
       },
       {
         id: "inheritance-genetics",
@@ -105,7 +119,7 @@ export const modules: Module[] = [
           "Inheritance lets a subclass acquire the fields and methods of a superclass, forming an is-a relationship. `class Dog extends Animal` — Dog receives Animal's interface and implementation, and may add members or override methods.",
           "Overriding replaces an inherited method with a specialized version; `super` calls the parent implementation. Prefer shallow hierarchies — deep inheritance chains couple code tightly, which is why composition is often favored.",
         ],
-        visualizer: null,
+        visualizer: "inheritance",
       },
       {
         id: "polymorphism-multitool",
@@ -121,7 +135,7 @@ export const modules: Module[] = [
           "Polymorphism lets code call a method on a supertype reference while the runtime dispatches to the subtype's override. `animals.forEach(a => a.speak())` executes Dog.speak or Cat.speak per element — this is dynamic (late) binding.",
           "This enables the Open/Closed Principle: adding `class Duck extends Animal` requires zero changes to the loop. Interfaces/duck-typing achieve the same decoupling without shared implementation.",
         ],
-        visualizer: null,
+        visualizer: "polymorphism",
       },
       {
         id: "abstraction-dashboard",
@@ -137,7 +151,7 @@ export const modules: Module[] = [
           "Abstraction reduces complexity by exposing essential operations and hiding implementation detail behind an interface or abstract class. Callers program against the contract (`Payment.charge()`), not the concrete mechanics (Stripe vs PayPal).",
           "Abstract classes declare methods without bodies that subclasses must implement, letting you define a stable contract while implementations vary and evolve independently.",
         ],
-        visualizer: null,
+        visualizer: "abstraction",
       },
     ],
   },
@@ -163,7 +177,7 @@ export const modules: Module[] = [
           "An array stores elements in one contiguous memory block. Index access is O(1): address = base + index × elementSize — pure arithmetic, no traversal.",
           "Insertion/deletion at index i is O(n) because subsequent elements must shift. Dynamic arrays (JS arrays, Python lists) resize by allocating a larger block and copying, giving amortized O(1) appends.",
         ],
-        visualizer: "big-o",
+        visualizer: "array",
       },
       {
         id: "linked-lists-treasure",
@@ -211,7 +225,7 @@ export const modules: Module[] = [
           "A tree is a connected acyclic hierarchy: each node has one parent (except the root) and zero or more children. Binary trees cap children at two; Binary Search Trees order them (left < node < right).",
           "BST search/insert/delete run in O(log n) when balanced — each comparison discards half the tree. Unbalanced trees degrade to O(n), which is why self-balancing variants (AVL, Red-Black) exist.",
         ],
-        visualizer: null,
+        visualizer: "tree",
       },
       {
         id: "hashmaps-dictionaries",
@@ -227,7 +241,7 @@ export const modules: Module[] = [
           "A hash map applies a hash function to a key to compute a bucket index: index = hash(key) % capacity. Average-case get/set/delete are O(1).",
           "Collisions are handled by chaining (bucket holds a list) or open addressing (probe for the next free slot). When the load factor exceeds a threshold (~0.75), the table resizes and rehashes to keep buckets short.",
         ],
-        visualizer: null,
+        visualizer: "hash-map",
       },
     ],
   },
@@ -269,7 +283,7 @@ export const modules: Module[] = [
           "Merge sort is divide-and-conquer: recursively sort each half, then merge the two sorted halves with a two-pointer linear pass.",
           "Time: O(n log n) in ALL cases — log n levels of splitting, O(n) merge work per level. Space: O(n) auxiliary for the merge buffer. Stable, and the standard choice for sorting linked lists and external (on-disk) data.",
         ],
-        visualizer: null,
+        visualizer: "merge-sort",
       },
       {
         id: "quick-sort",
@@ -285,7 +299,7 @@ export const modules: Module[] = [
           "Quicksort partitions around a pivot so smaller elements precede it and larger follow, placing the pivot at its final index, then recurses on both sides.",
           "Time: O(n log n) average, O(n²) worst (adversarial pivots, e.g. sorted input with first-element pivot — mitigated by random/median-of-three selection). Space: O(log n) recursion. In-place and cache-friendly, which is why it wins in practice.",
         ],
-        visualizer: null,
+        visualizer: "quick-sort",
       },
       {
         id: "binary-search",
@@ -317,7 +331,7 @@ export const modules: Module[] = [
           "BFS explores a graph level-by-level using a queue: dequeue a node, enqueue its unvisited neighbors, mark visited on enqueue (to avoid duplicates). Layers correspond to distance from the source.",
           "Time: O(V + E); space: O(V) for the queue and visited set. Guarantees shortest paths in unweighted graphs. The queue is what enforces \"finish this ring before starting the next\".",
         ],
-        visualizer: null,
+        visualizer: "bfs",
       },
       {
         id: "dfs-maze",
@@ -333,7 +347,7 @@ export const modules: Module[] = [
           "DFS explores as far as possible along each branch before backtracking, via recursion (the call stack) or an explicit stack. Mark nodes visited to handle cycles.",
           "Time: O(V + E); space: O(V) worst-case stack depth. Does NOT find shortest paths, but underpins topological sort, cycle detection, connected components, and backtracking solvers (sudoku, N-queens).",
         ],
-        visualizer: null,
+        visualizer: "dfs",
       },
     ],
   },
@@ -391,7 +405,7 @@ export const modules: Module[] = [
           "Space complexity counts auxiliary memory as a function of n, excluding the input itself. In-place bubble sort: O(1). Merge sort's buffer: O(n). Recursion counts stack frames: naive Fibonacci is O(n) deep.",
           "The time-space trade-off is fundamental: memoization turns exponential O(2ⁿ) recursion into O(n) time at the cost of an O(n) table. Interviewers routinely accept extra space to buy speed — say the trade aloud.",
         ],
-        visualizer: null,
+        visualizer: "memory",
       },
       {
         id: "optimizing-systems",

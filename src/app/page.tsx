@@ -23,15 +23,18 @@ export default function HomePage() {
           <strong className="text-neon-green">🧸 ELI5</strong> and{" "}
           <strong className="text-neon">⚙️ Tech</strong> explanations.
         </p>
-        <div className="mt-8 flex justify-center gap-3">
-          <Link href="/dashboard" className="btn-primary px-6 py-3 text-base">
-            🚀 Start Day 1
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link href="/signup" className="btn-primary px-6 py-3 text-base">
+            🚀 Create free account
+          </Link>
+          <Link href="/dashboard" className="btn-ghost px-6 py-3 text-base">
+            📅 My dashboard
           </Link>
           <Link
             href={`/learn/${modules[2].id}/bubble-sort`}
             className="btn-ghost px-6 py-3 text-base"
           >
-            👀 Watch Bubble Sort live
+            👀 Try the sample: Bubble Sort
           </Link>
         </div>
         <div className="mx-auto mt-12 grid max-w-2xl grid-cols-3 gap-3">

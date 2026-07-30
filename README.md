@@ -1,4 +1,4 @@
-# 🦸 Zero to Hero — Interactive Coding Bootcamp
+# 🦸 ELI5Code — Zero to Hero Interactive Coding Bootcamp
 
 Master **OOP, Data Structures, Algorithms & Big O** in 60 days at 2 hours/day —
 built for visual learners who need to *see* Bubble Sort happen, not read about it.
@@ -7,20 +7,24 @@ built for visual learners who need to *see* Bubble Sort happen, not read about i
 
 - **🧸 ELI5 / ⚙️ Tech toggle** — a global switch (navbar + every lesson) that flips
   every explanation between a real-world analogy and proper technical jargon.
-- **🎬 Interactive visualizers** — step through algorithms frame-by-frame with
-  play / pause / step-forward / step-back / speed controls:
-  - Bubble Sort (bars physically swap, powered by Framer Motion layout animations)
-  - Linked List (nodes wire together with animated arrows on insert)
-  - Stack & Queue (cafeteria plates / lunch line)
-  - Binary Search (watch the search zone get chopped in half)
-  - Big O growth chart (drag to probe O(1) vs O(n) vs O(n²) at any n)
+- **🎬 A visualizer in EVERY lesson** (all 21) — step through algorithms
+  frame-by-frame with play / pause / step-forward / step-back / speed controls:
+  - OOP: blueprint→houses builder, encapsulation capsule, inheritance family
+    tree, polymorphism zoo, abstraction "under the hood"
+  - Data structures: array bookshelf, linked list treasure hunt, stack/queue
+    cafeteria, BST org chart, hash map dictionary drawers
+  - Algorithms: bubble / merge / quick sort with animated bar swaps, binary
+    search zone-chopping, BFS ripples & DFS maze on a live graph
+  - Big O: draggable growth chart (O(1)…O(n²)) and a space-complexity memory grid
+- **🔐 Accounts** — email + username + password signup (Supabase Auth) collecting
+  role, university, experience, and goal; guests can try sample lessons first.
 - **📈 60-day dashboard** — day-by-day roadmap paced at 2 hrs/day, milestone
   markers at Day 30 (80% strength) and Day 60 (90%), and modules that unlock
   as you complete the previous one.
 - **🤖 AI tutor** — floating ask-anything button that answers in ELI5 or Tech
   style to match your toggle.
 - **☁️ Supabase sync** — progress persists locally (zustand + localStorage) and
-  syncs to Supabase per anonymous device id. Works fully offline too.
+  syncs per user (or per anonymous device for guests). Works fully offline too.
 
 ## Tech stack
 

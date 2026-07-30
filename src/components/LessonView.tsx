@@ -7,6 +7,9 @@ import { useBootcamp } from "@/lib/store";
 import ModeToggle from "./ModeToggle";
 import VisualizerHost from "./visualizers/VisualizerHost";
 
+/** Lessons guests can try without an account. */
+const SAMPLE_LESSONS = ["classes-blueprints", "bubble-sort"];
+
 /**
  * Reusable interactive lesson template: analogy banner, the global ELI5/Tech
  * toggle, animated explanation swap, an optional visualizer, and progress
@@ -25,6 +28,8 @@ export default function LessonView({
   const completedLessons = useBootcamp((s) => s.completedLessons);
   const completeLesson = useBootcamp((s) => s.completeLesson);
   const uncompleteLesson = useBootcamp((s) => s.uncompleteLesson);
+  const authUser = useBootcamp((s) => s.authUser);
+  const authReady = useBootcamp((s) => s.authReady);
 
   if (!hit) return null;
   const { module: mod, lesson } = hit;
@@ -32,6 +37,36 @@ export default function LessonView({
   const isComplete = hydrated && completedLessons.includes(lesson.id);
   const next = nextLesson(moduleId, lessonId);
   const paragraphs = activeMode === "eli5" ? lesson.eli5 : lesson.tech;
+  const isGuestLocked = authReady && !authUser && !SAMPLE_LESSONS.includes(lesson.id);
+
+  if (isGuestLocked) {
+    return (
+      <article className="mx-auto max-w-xl pt-10 text-center">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="card p-10">
+          <div className="mb-3 text-5xl">🔐</div>
+          <h1 className="mb-2 text-2xl font-extrabold">
+            {lesson.emoji} {lesson.title}
+          </h1>
+          <p className="mb-6 text-sm text-slate-400">
+            This lesson (and 20 more with interactive visualizers) unlocks with a free
+            account — so your progress saves and syncs across devices.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href="/signup" className="btn-primary px-6 py-3">
+              🚀 Create free account
+            </Link>
+            <Link href={`/learn/oop/${SAMPLE_LESSONS[0]}`} className="btn-ghost px-6 py-3">
+              🧸 Try the sample lesson
+            </Link>
+          </div>
+          <p className="mt-4 text-xs text-slate-500">
+            Already signed up?{" "}
+            <Link href="/login" className="text-neon hover:underline">Log in</Link>
+          </p>
+        </motion.div>
+      </article>
+    );
+  }
 
   return (
     <article className="mx-auto max-w-3xl">
