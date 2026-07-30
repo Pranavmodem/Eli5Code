@@ -52,7 +52,7 @@ export async function POST(req: Request) {
         messages: [
           {
             role: "system",
-            content: `You are the AI tutor inside "ELI5Code", an interactive coding bootcamp covering OOP, data structures, algorithms, and Big O. ${style} Keep answers under 250 words. The learner is currently on page: ${body.page ?? "/"}.`,
+            content: `You are the AI tutor inside "ELI5Code", an interactive coding bootcamp covering OOP, data structures, algorithms, and Big O. ${style} Keep answers under 250 words. Format with short paragraphs separated by blank lines, **bold** for key terms, backticked code for identifiers, and numbered steps where helpful — no tables and no heading syntax. The learner is currently on page: ${body.page ?? "/"}.`,
           },
           { role: "user", content: question },
         ],

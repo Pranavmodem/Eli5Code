@@ -9,6 +9,37 @@ import { useBootcamp } from "@/lib/store";
  * /api/ask, which proxies an OpenAI-compatible endpoint using server-side
  * env vars (AI_API_URL / AI_API_KEY / AI_MODEL). Answers match ELI5/Tech mode.
  */
+
+/** Render the model's lightweight markdown: **bold**, `code`, ### headings. */
+function renderInline(text: string) {
+  return text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) return <strong key={i}>{part.slice(2, -2)}</strong>;
+    if (part.startsWith("`") && part.endsWith("`"))
+      return (
+        <code key={i} className="mono" style={{ background: "color-mix(in srgb, var(--color-text) 8%, transparent)", padding: "0 4px", fontSize: "0.92em" }}>
+          {part.slice(1, -1)}
+        </code>
+      );
+    return part;
+  });
+}
+
+function Answer({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/\n/).map((line, i) => {
+        const heading = line.match(/^#{1,4}\s+(.*)$/);
+        const bullet = line.match(/^\s*[-*•]\s+(.*)$/);
+        const numbered = line.match(/^\s*(\d+)[.)]\s+(.*)$/);
+        if (heading) return <div key={i} style={{ fontWeight: 700, margin: "8px 0 2px" }}>{renderInline(heading[1])}</div>;
+        if (bullet) return <div key={i} style={{ paddingLeft: 16, margin: "2px 0" }}>• {renderInline(bullet[1])}</div>;
+        if (numbered) return <div key={i} style={{ paddingLeft: 16, margin: "2px 0" }}>{numbered[1]}. {renderInline(numbered[2])}</div>;
+        if (!line.trim()) return <div key={i} style={{ height: 8 }} />;
+        return <div key={i}>{renderInline(line)}</div>;
+      })}
+    </>
+  );
+}
 export default function AskAI() {
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
@@ -80,8 +111,8 @@ export default function AskAI() {
           </button>
           {error && <p style={{ color: "var(--color-accent-700)", fontSize: 12, marginTop: 8 }}>{error}</p>}
           {answer && (
-            <div style={{ marginTop: 10, maxHeight: 260, overflowY: "auto", border: "1px solid var(--color-divider)", background: "var(--color-surface)", padding: "var(--space-3)", fontSize: 13.5, lineHeight: 1.55 }}>
-              {answer}
+            <div style={{ marginTop: 10, maxHeight: 280, overflowY: "auto", border: "1px solid var(--color-divider)", background: "var(--color-surface)", padding: "var(--space-3)", fontSize: 13.5, lineHeight: 1.55 }}>
+              <Answer text={answer} />
             </div>
           )}
         </div>
