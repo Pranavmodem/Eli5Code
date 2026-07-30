@@ -70,6 +70,42 @@ body {
   font-family: var(--font-body);
 }
 
+/* ── responsive layout helpers ─────────────────────────────────────────── */
+.page {
+  width: 100%;
+  margin: 0 auto;
+  padding: clamp(14px, 3.5vw, 28px);
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+.cols-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+.h-display { font-size: clamp(40px, 8vw, 64px); }
+.h-hero    { font-size: clamp(32px, 6.5vw, 56px); }
+.h-page    { font-size: clamp(28px, 6vw, 46px); }
+
+.site-nav {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+@media (max-width: 920px) {
+  .hero-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .site-nav { padding: 10px 14px !important; gap: 10px 14px !important; }
+  .site-nav nav { gap: 14px !important; order: 3; width: 100%; }
+}
+@media (max-width: 560px) {
+  .cols-2 { grid-template-columns: 1fr; }
+}
+
 /* ── app helpers on top of the design system ───────────────────────────── */
 .zh-cell:hover {
   border-color: var(--color-accent) !important;

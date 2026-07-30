@@ -38,7 +38,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ padding: "var(--space-8)", maxWidth: 420, margin: "0 auto" }}>
+    <div className="page" style={{ maxWidth: 440 }}>
       <div className="kicker" style={{ marginBottom: 4 }}>Welcome back</div>
       <h1 style={{ marginBottom: "var(--space-6)" }}>Log in</h1>
       <form onSubmit={submit} className="blueprint" style={{ padding: "var(--space-6)", display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>

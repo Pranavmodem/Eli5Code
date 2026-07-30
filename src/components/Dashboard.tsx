@@ -28,7 +28,7 @@ export default function Dashboard() {
   const todays = lessonForDay(day);
 
   return (
-    <div style={{ padding: "var(--space-8)", display: "flex", flexDirection: "column", gap: "var(--space-8)", maxWidth: 1560, width: "100%", margin: "0 auto" }}>
+    <div className="page" style={{ display: "flex", flexDirection: "column", gap: "var(--space-8)", maxWidth: 1560 }}>
       {authReady && !authUser && (
         <div className="blueprint" style={{ padding: "var(--space-4) var(--space-6)", display: "flex", alignItems: "center", gap: "var(--space-4)", flexWrap: "wrap" }}>
           <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
@@ -43,12 +43,12 @@ export default function Dashboard() {
       )}
 
       {/* hero */}
-      <section style={{ display: "grid", gridTemplateColumns: "1.35fr 1fr", gap: "var(--space-8)", alignItems: "start" }} className="max-md:!grid-cols-1">
+      <section className="hero-grid">
         <div>
           <div className="kicker" style={{ marginBottom: "var(--space-3)" }}>
             60 days — 2 hours a day — Python — 0 to 100%
           </div>
-          <h1 style={{ fontSize: 64, lineHeight: 0.95, margin: "0 0 var(--space-4)" }}>
+          <h1 className="h-display" style={{ lineHeight: 0.95, margin: "0 0 var(--space-4)" }}>
             DAY {day} <span style={{ color: "var(--color-neutral-500)" }}>/ {TOTAL_DAYS}</span>
           </h1>
           <p style={{ fontSize: 17, lineHeight: 1.55, maxWidth: "54ch", margin: "0 0 var(--space-6)", color: "var(--color-neutral-800)" }}>
@@ -68,7 +68,7 @@ export default function Dashboard() {
                 <i key={m.day} title={m.label} style={{ position: "absolute", top: 0, bottom: 0, left: `${m.strength}%`, width: 2, background: "var(--color-accent-800)", opacity: 0.65 }} />
               ))}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "var(--space-2)" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: "var(--space-2)" }}>
               <Stat v={`${s.streak}d`} l="streak" />
               <Stat v={`${s.xp}`} l="XP" />
               <Stat v={`${s.hoursLogged}h`} l="hours logged" />

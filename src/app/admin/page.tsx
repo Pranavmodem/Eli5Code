@@ -32,7 +32,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div style={{ padding: "var(--space-8)", maxWidth: 1280, margin: "0 auto" }}>
+    <div className="page" style={{ maxWidth: 1280 }}>
       <div className="kicker" style={{ marginBottom: 4 }}>Admin console</div>
       <h1 style={{ marginBottom: "var(--space-2)" }}>Learners</h1>
       <p className="text-muted" style={{ fontSize: 13.5, marginBottom: "var(--space-6)" }}>

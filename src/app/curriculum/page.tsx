@@ -5,7 +5,7 @@ export const metadata = { title: "Curriculum — ELI5Code" };
 
 export default function CurriculumPage() {
   return (
-    <div style={{ padding: "var(--space-8)", maxWidth: 1100, margin: "0 auto" }}>
+    <div className="page" style={{ maxWidth: 1100 }}>
       <div className="kicker" style={{ marginBottom: "var(--space-2)" }}>
         8 modules · 80 lessons · {TOTAL_DAYS}-day core + advanced track to day {PROGRAM_DAYS}
       </div>

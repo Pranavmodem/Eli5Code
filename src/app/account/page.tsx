@@ -51,7 +51,7 @@ export default function AccountPage() {
   };
 
   return (
-    <div style={{ padding: "var(--space-8)", maxWidth: 460, margin: "0 auto" }}>
+    <div className="page" style={{ maxWidth: 480 }}>
       <div className="kicker" style={{ marginBottom: 4 }}>@{authUser?.username ?? "account"}</div>
       <h1 style={{ marginBottom: "var(--space-2)" }}>Account settings</h1>
       <p className="text-muted" style={{ fontSize: 13.5, marginBottom: "var(--space-6)" }}>

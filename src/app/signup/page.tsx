@@ -64,7 +64,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div style={{ padding: "var(--space-8)", maxWidth: 480, margin: "0 auto" }}>
+    <div className="page" style={{ maxWidth: 500 }}>
       <div className="kicker" style={{ marginBottom: 4 }}>Free forever</div>
       <h1 style={{ marginBottom: "var(--space-2)" }}>Create your account</h1>
       <p className="text-muted" style={{ fontSize: 13.5, marginBottom: "var(--space-6)" }}>
@@ -91,7 +91,7 @@ export default function SignupPage() {
             <label>Password</label>
             <input className="input" required type="password" value={form.password} onChange={set("password")} placeholder="At least 8 characters" minLength={8} autoComplete="new-password" />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" }}>
+          <div className="cols-2">
             <div className="field">
               <label>I am a…</label>
               <select className="input" value={form.role} onChange={set("role")}>

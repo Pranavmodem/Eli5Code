@@ -36,7 +36,7 @@ export default function NavBar() {
   );
   return (
     <header
-      className="nav"
+      className="nav site-nav"
       style={{
         display: "flex",
         alignItems: "center",

@@ -63,7 +63,7 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
   const body = activeMode === "eli5" ? lesson.e : lesson.k;
 
   return (
-    <article style={{ padding: "var(--space-8)", maxWidth: 1180, margin: "0 auto", display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
+    <article className="page" style={{ maxWidth: 1280, display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
       {/* breadcrumb + day */}
       <nav style={{ display: "flex", gap: 8, alignItems: "baseline", fontSize: 12 }} className="text-muted">
         <Link href="/dashboard">Dashboard</Link>
@@ -77,7 +77,7 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
       {/* header */}
       <header>
         <div className="kicker" style={{ marginBottom: 4 }}>{lesson.a}</div>
-        <h1 style={{ fontSize: 46, margin: 0 }}>{lesson.t}</h1>
+        <h1 className="h-page" style={{ margin: 0 }}>{lesson.t}</h1>
       </header>
 
       {/* explanation — ELI5/Tech toggle lives here, next to the definition */}
