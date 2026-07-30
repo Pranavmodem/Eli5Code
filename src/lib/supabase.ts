@@ -45,7 +45,7 @@ export async function adminListUsers(): Promise<AdminUserRow[] | null> {
     return null;
   }
   return (data ?? []).map((r: Record<string, unknown>) => ({
-    ...(r as AdminUserRow),
+    ...(r as unknown as AdminUserRow),
     completed_lessons: (r.completed_lessons as string[]) ?? [],
   }));
 }
