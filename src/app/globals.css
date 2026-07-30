@@ -1,39 +1,117 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* ─────────────────────────────────────────────────────────────────────────
+   Dark theme — Nocturne palette mapped onto the Industry token names.
+   The tonal ramps are FLIPPED (100 ↔ 900) so markup written against the
+   light system stays readable: "neutral-800 text" is near-black on light
+   and near-white on dark.
+   ──────────────────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --color-bg: #161826;
+  --color-surface: #232532;
+  --color-text: #e9e9ed;
+  --color-accent: #9184d9;
+  --color-accent-2: #a7a1db;
+  --color-divider: color-mix(in srgb, #e9e9ed 16%, transparent);
+
+  --color-neutral-100: #292b31;
+  --color-neutral-200: #3f424d;
+  --color-neutral-300: #595d6c;
+  --color-neutral-400: #75798c;
+  --color-neutral-500: #9397ab;
+  --color-neutral-600: #b2b6ca;
+  --color-neutral-700: #cfd3e5;
+  --color-neutral-800: #e4e7f5;
+  --color-neutral-900: #f3f5fe;
+
+  --color-accent-100: #2b2741;
+  --color-accent-200: #423a6a;
+  --color-accent-300: #5d5294;
+  --color-accent-400: #796cbf;
+  --color-accent-500: #968ae0;
+  --color-accent-600: #b5abfc;
+  --color-accent-700: #d2cefd;
+  --color-accent-800: #e7e5fe;
+  --color-accent-900: #f5f4ff;
+
+  --color-accent-2-100: #2b2837;
+  --color-accent-2-200: #423e59;
+  --color-accent-2-300: #5d587f;
+  --color-accent-2-400: #7873a3;
+  --color-accent-2-500: #9690c9;
+  --color-accent-2-600: #b5afe8;
+  --color-accent-2-700: #d2cefd;
+  --color-accent-2-800: #e7e5fe;
+  --color-accent-2-900: #f5f4ff;
+
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-heading-weight: 600;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 3px 10px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+html {
+  color-scheme: light;
+}
+html[data-theme="dark"] {
   color-scheme: dark;
 }
 
 body {
-  @apply bg-ink-950 text-slate-200 antialiased;
-  background-image: radial-gradient(1200px 600px at 80% -10%, rgba(34, 211, 238, 0.07), transparent),
-    radial-gradient(900px 500px at 10% 110%, rgba(167, 139, 250, 0.07), transparent);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
 }
 
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+/* ── app helpers on top of the design system ───────────────────────────── */
+.zh-cell:hover {
+  border-color: var(--color-accent) !important;
 }
-::-webkit-scrollbar-track {
-  background: #0b0e17;
+.zh-row:hover {
+  background: color-mix(in srgb, var(--color-text) 4%, transparent);
 }
-::-webkit-scrollbar-thumb {
-  background: #242c4a;
-  border-radius: 6px;
+.kicker {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent-700);
+}
+.mono {
+  font-family: ui-monospace, Menlo, monospace;
+}
+.codeblock {
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
 }
 
-.card {
-  @apply rounded-2xl border border-ink-600/60 bg-ink-800/70 backdrop-blur;
+/* visualizer stage primitives */
+.viz-stage {
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  min-height: 280px;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-x: auto;
 }
-
-.btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed;
-}
-.btn-primary {
-  @apply btn bg-neon text-ink-950 hover:bg-cyan-300;
-}
-.btn-ghost {
-  @apply btn border border-ink-600 bg-ink-800 text-slate-200 hover:border-neon/60 hover:text-neon;
+.viz-msg {
+  min-height: 3.2em;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-neutral-800);
 }

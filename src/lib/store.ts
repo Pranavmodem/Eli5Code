@@ -2,11 +2,13 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type Mode = "eli5" | "tech";
+export type Theme = "light" | "dark";
 
 export interface AuthUser {
   id: string;
   email: string;
   username: string | null;
+  isAdmin?: boolean;
 }
 
 interface BootcampState {
@@ -23,8 +25,13 @@ interface BootcampState {
   startDate: string | null;
   /** Lesson ids marked complete */
   completedLessons: string[];
+  /** yyyy-mm-dd days with activity — drives the streak tag */
+  activityDates: string[];
+  theme: Theme;
   hasHydrated: boolean;
 
+  setTheme: (t: Theme) => void;
+  toggleTheme: () => void;
   setMode: (mode: Mode) => void;
   toggleMode: () => void;
   ensureDeviceId: () => void;
@@ -46,8 +53,12 @@ export const useBootcamp = create<BootcampState>()(
       deviceId: null,
       startDate: null,
       completedLessons: [],
+      activityDates: [],
+      theme: "light",
       hasHydrated: false,
 
+      setTheme: (theme) => set({ theme }),
+      toggleTheme: () => set({ theme: get().theme === "light" ? "dark" : "light" }),
       setMode: (mode) => set({ mode }),
       toggleMode: () => set({ mode: get().mode === "eli5" ? "tech" : "eli5" }),
 
@@ -62,10 +73,14 @@ export const useBootcamp = create<BootcampState>()(
       },
 
       completeLesson: (lessonId) => {
-        const { completedLessons, startDate } = get();
+        const { completedLessons, startDate, activityDates } = get();
         if (completedLessons.includes(lessonId)) return;
+        const today = new Date().toISOString().slice(0, 10);
         set({
           completedLessons: [...completedLessons, lessonId],
+          activityDates: activityDates.includes(today)
+            ? activityDates
+            : [...activityDates, today],
           startDate: startDate ?? new Date().toISOString(),
         });
       },
@@ -92,9 +107,11 @@ export const useBootcamp = create<BootcampState>()(
       name: "zero-to-hero-progress",
       partialize: (s) => ({
         mode: s.mode,
+        theme: s.theme,
         deviceId: s.deviceId,
         startDate: s.startDate,
         completedLessons: s.completedLessons,
+        activityDates: s.activityDates,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);

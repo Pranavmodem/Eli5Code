@@ -31,6 +31,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             profile?.username ??
             (session.user.user_metadata?.username as string | undefined) ??
             null,
+          isAdmin: profile?.is_admin ?? false,
         });
       }
     };

@@ -3,12 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { getSupabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // email OR username
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,17 +16,21 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     const sb = getSupabase();
-    if (!sb) {
-      setError("Login isn't available right now (backend not configured).");
-      return;
-    }
+    if (!sb) return setError("Login isn't available right now.");
     setLoading(true);
     try {
-      const { error: err } = await sb.auth.signInWithPassword({ email: email.trim(), password });
-      if (err) {
-        setError(err.message);
-        return;
+      let email = identifier.trim();
+      if (!email.includes("@")) {
+        // username login — resolve to the account's email server-side
+        const { data, error: rpcErr } = await sb.rpc("get_login_email", { name: email });
+        if (rpcErr || !data) {
+          setError("No account found with that username.");
+          return;
+        }
+        email = data as string;
       }
+      const { error: err } = await sb.auth.signInWithPassword({ email, password });
+      if (err) return setError(err.message);
       router.push("/dashboard");
     } finally {
       setLoading(false);
@@ -35,45 +38,27 @@ export default function LoginPage() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mx-auto max-w-md"
-    >
-      <h1 className="mb-1 text-3xl font-extrabold tracking-tight">Welcome back</h1>
-      <p className="mb-6 text-sm text-slate-400">Pick up right where you left off.</p>
-      <form onSubmit={submit} className="card space-y-4 p-6">
-        <label className="block">
-          <span className="mb-1 block text-xs font-bold uppercase tracking-widest text-slate-400">Email</span>
-          <input
-            required
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-ink-600 bg-ink-900 px-3 py-2 text-sm text-slate-200 outline-none focus:border-neon/60"
-            placeholder="you@example.com"
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1 block text-xs font-bold uppercase tracking-widest text-slate-400">Password</span>
-          <input
-            required
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-ink-600 bg-ink-900 px-3 py-2 text-sm text-slate-200 outline-none focus:border-neon/60"
-            placeholder="••••••••"
-          />
-        </label>
-        {error && <p className="text-xs text-neon-rose">{error}</p>}
-        <button className="btn-primary w-full py-3" disabled={loading}>
+    <div style={{ padding: "var(--space-8)", maxWidth: 420, margin: "0 auto" }}>
+      <div className="kicker" style={{ marginBottom: 4 }}>Welcome back</div>
+      <h1 style={{ marginBottom: "var(--space-6)" }}>Log in</h1>
+      <form onSubmit={submit} className="blueprint" style={{ padding: "var(--space-6)", display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+        <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
+        <div className="field">
+          <label>Email or username</label>
+          <input className="input" required value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com — or just your username" autoComplete="username" />
+        </div>
+        <div className="field">
+          <label>Password</label>
+          <input className="input" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+        </div>
+        {error && <p style={{ color: "var(--color-accent-700)", fontSize: 13, margin: 0 }}>{error}</p>}
+        <button className="btn btn-primary btn-block" disabled={loading}>
           {loading ? "Logging in…" : "Log in"}
         </button>
-        <p className="text-center text-xs text-slate-500">
-          New here?{" "}
-          <Link href="/signup" className="text-neon hover:underline">Create a free account</Link>
+        <p className="text-muted" style={{ fontSize: 12.5, textAlign: "center", margin: 0 }}>
+          New here? <Link href="/signup">Create a free account</Link>
         </p>
       </form>
-    </motion.div>
+    </div>
   );
 }

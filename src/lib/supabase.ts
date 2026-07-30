@@ -23,6 +23,38 @@ export interface Profile {
   university: string | null;
   experience: string | null;
   goal: string | null;
+  is_admin?: boolean;
+}
+
+export interface AdminUserRow extends Profile {
+  created_at?: string;
+  completed_lessons?: string[];
+  progress_updated_at?: string | null;
+}
+
+/** Admin-only: RLS lets is_admin accounts read every profile + progress row. */
+export async function adminListUsers(): Promise<AdminUserRow[] | null> {
+  const sb = getSupabase();
+  if (!sb) return null;
+  const [profiles, progress] = await Promise.all([
+    sb.from("profiles").select("id, username, role, university, experience, goal, is_admin, created_at").order("created_at"),
+    sb.from("user_progress").select("user_id, completed_lessons, updated_at"),
+  ]);
+  if (profiles.error) {
+    console.warn("admin list failed:", profiles.error.message);
+    return null;
+  }
+  const progressById = new Map(
+    (progress.data ?? []).map((p) => [p.user_id as string, p])
+  );
+  return (profiles.data ?? []).map((p) => {
+    const prog = progressById.get(p.id);
+    return {
+      ...(p as AdminUserRow),
+      completed_lessons: (prog?.completed_lessons as string[]) ?? [],
+      progress_updated_at: (prog?.updated_at as string) ?? null,
+    };
+  });
 }
 
 export async function fetchProfile(userId: string): Promise<Profile | null> {
@@ -30,7 +62,7 @@ export async function fetchProfile(userId: string): Promise<Profile | null> {
   if (!sb) return null;
   const { data, error } = await sb
     .from("profiles")
-    .select("id, username, role, university, experience, goal")
+    .select("id, username, role, university, experience, goal, is_admin")
     .eq("id", userId)
     .maybeSingle();
   if (error) {

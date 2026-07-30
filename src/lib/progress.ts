@@ -1,38 +1,39 @@
-import { allLessons, modules, Module, TOTAL_DAYS, HOURS_PER_DAY } from "./curriculum";
+import {
+  allLessons,
+  CORE_LESSONS,
+  MASTERY_PER_LESSON,
+  TOTAL_DAYS,
+  HOURS_PER_DAY,
+} from "./curriculum";
 
 export interface ProgressSummary {
   completedCount: number;
   totalLessons: number;
-  /** Days of curriculum material fully completed (each lesson covers a day range) */
-  daysCompleted: number;
+  /** DSA mastery, 0–100: one core lesson moves it 2.5 points */
+  mastery: number;
+  xp: number;
+  level: number;
+  streak: number;
   hoursLogged: number;
-  /** 0–100 "coding strength": 80% at day 30 of material, 90% at day 60 */
-  strength: number;
   /** Calendar day of the journey, 1-based; 0 if not started */
   calendarDay: number;
-  pace: "not-started" | "ahead" | "on-track" | "behind";
 }
 
-export function lessonDayCount(days: [number, number]): number {
-  return days[1] - days[0] + 1;
-}
+const XP_PER_LESSON = 25;
 
 export function summarizeProgress(
   completedLessons: string[],
   startDate: string | null,
+  activityDates: string[] = [],
   now: Date = new Date()
 ): ProgressSummary {
-  const completedSet = new Set(completedLessons);
-  const daysCompleted = allLessons
-    .filter((l) => completedSet.has(l.id))
-    .reduce((sum, l) => sum + lessonDayCount(l.days), 0);
+  const done = new Set(completedLessons);
+  const coreDone = CORE_LESSONS.filter((l) => done.has(l.id)).length;
+  const totalDone = allLessons.filter((l) => done.has(l.id)).length;
 
-  // Strength curve: linear to 80% over the first 30 days of material,
-  // then linear from 80% to 90% over days 31–60.
-  const strength =
-    daysCompleted <= 30
-      ? (daysCompleted / 30) * 80
-      : 80 + ((daysCompleted - 30) / 30) * 10;
+  const mastery = Math.min(100, Math.round(coreDone * MASTERY_PER_LESSON * 10) / 10);
+  const xp = totalDone * XP_PER_LESSON;
+  const level = Math.floor(xp / 100) + 1;
 
   let calendarDay = 0;
   if (startDate) {
@@ -40,36 +41,47 @@ export function summarizeProgress(
     calendarDay = Math.max(1, Math.min(TOTAL_DAYS, Math.floor(ms / 86_400_000) + 1));
   }
 
-  let pace: ProgressSummary["pace"] = "not-started";
-  if (startDate) {
-    if (daysCompleted >= calendarDay) pace = "ahead";
-    else if (daysCompleted >= calendarDay - 2) pace = "on-track";
-    else pace = "behind";
+  // streak: consecutive days ending today or yesterday
+  const days = new Set(activityDates);
+  let streak = 0;
+  const cursor = new Date(now);
+  const key = (d: Date) => d.toISOString().slice(0, 10);
+  if (!days.has(key(cursor))) cursor.setDate(cursor.getDate() - 1); // grace: yesterday keeps it alive
+  while (days.has(key(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
   }
 
   return {
-    completedCount: completedLessons.length,
+    completedCount: totalDone,
     totalLessons: allLessons.length,
-    daysCompleted,
-    hoursLogged: daysCompleted * HOURS_PER_DAY,
-    strength: Math.round(strength * 10) / 10,
+    mastery,
+    xp,
+    level,
+    streak,
+    hoursLogged: totalDone * HOURS_PER_DAY,
     calendarDay,
-    pace,
   };
 }
 
-/** A module unlocks when every lesson in all previous modules is complete. */
-export function isModuleUnlocked(mod: Module, completedLessons: string[]): boolean {
-  const completedSet = new Set(completedLessons);
-  for (const m of modules) {
-    if (m.order >= mod.order) break;
-    if (!m.lessons.every((l) => completedSet.has(l.id))) return false;
-  }
-  return true;
+/** A module unlocks when at least 70% of the previous module is complete. */
+export function isModuleUnlocked(
+  moduleIndex: number,
+  modules: { lessons: { id: string }[] }[],
+  completedLessons: string[]
+): boolean {
+  if (moduleIndex === 0) return true;
+  const prev = modules[moduleIndex - 1];
+  const done = new Set(completedLessons);
+  const count = prev.lessons.filter((l) => done.has(l.id)).length;
+  return count >= Math.ceil(prev.lessons.length * 0.7);
 }
 
-export function moduleProgress(mod: Module, completedLessons: string[]): number {
-  const completedSet = new Set(completedLessons);
-  const done = mod.lessons.filter((l) => completedSet.has(l.id)).length;
-  return Math.round((done / mod.lessons.length) * 100);
+export function moduleProgress(
+  mod: { lessons: { id: string }[] },
+  completedLessons: string[]
+): number {
+  const done = new Set(completedLessons);
+  const n = mod.lessons.filter((l) => done.has(l.id)).length;
+  return Math.round((n / mod.lessons.length) * 100);
 }

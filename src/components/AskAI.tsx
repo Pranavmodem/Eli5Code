@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
 import { useBootcamp } from "@/lib/store";
 
 /**
  * Floating AI tutor. Sends the question + current mode + page context to
  * /api/ask, which proxies an OpenAI-compatible endpoint using server-side
- * env vars (AI_API_URL / AI_API_KEY). Answers match the ELI5/Tech mode.
+ * env vars (AI_API_URL / AI_API_KEY / AI_MODEL). Answers match ELI5/Tech mode.
  */
 export default function AskAI() {
   const [open, setOpen] = useState(false);
@@ -43,57 +42,50 @@ export default function AskAI() {
 
   return (
     <>
-      <motion.button
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.94 }}
+      <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-neon text-2xl text-ink-950 shadow-glow"
         aria-label="Ask the AI tutor"
+        className="btn btn-primary"
+        style={{ position: "fixed", bottom: 22, right: 22, zIndex: 50, width: 52, height: 52, borderRadius: "50%", fontSize: 22, boxShadow: "var(--shadow-lg)", padding: 0 }}
       >
-        {open ? "✕" : "🤖"}
-      </motion.button>
+        {open ? "✕" : "?"}
+      </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.96 }}
-            className="fixed bottom-24 right-5 z-50 w-[min(92vw,24rem)] rounded-2xl border border-ink-600 bg-ink-800 p-4 shadow-2xl"
-          >
-            <h3 className="mb-1 text-sm font-bold">🤖 AI Tutor</h3>
-            <p className="mb-3 text-xs text-slate-400">
-              Stuck on this lesson? Ask anything — I'll answer in{" "}
-              <span className="font-bold text-neon-green">
-                {mode === "eli5" ? "ELI5" : "technical"}
-              </span>{" "}
-              style to match your toggle.
-            </p>
-            <textarea
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  ask();
-                }
-              }}
-              rows={2}
-              placeholder="e.g. Why is binary search O(log n)?"
-              className="mb-2 w-full resize-none rounded-lg border border-ink-600 bg-ink-900 p-2 text-sm text-slate-200 outline-none focus:border-neon/60"
-            />
-            <button className="btn-primary w-full" onClick={ask} disabled={loading || !question.trim()}>
-              {loading ? "Thinking…" : "Ask"}
-            </button>
-            {error && <p className="mt-3 text-xs text-neon-rose">{error}</p>}
-            {answer && (
-              <div className="mt-3 max-h-64 overflow-y-auto rounded-lg border border-ink-700 bg-ink-900/70 p-3 text-sm leading-relaxed text-slate-200">
-                {answer}
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {open && (
+        <div
+          className="blueprint"
+          style={{ position: "fixed", bottom: 86, right: 22, zIndex: 50, width: "min(92vw, 380px)", background: "var(--color-bg)", boxShadow: "var(--shadow-lg)", padding: "var(--space-4)" }}
+        >
+          <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
+          <div className="kicker" style={{ marginBottom: 4 }}>AI tutor</div>
+          <p className="text-muted" style={{ fontSize: 12, marginBottom: "var(--space-3)" }}>
+            Stuck? Ask anything — answers come in <b>{mode === "eli5" ? "ELI5" : "technical"}</b> style to match your toggle.
+          </p>
+          <textarea
+            className="input"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                ask();
+              }
+            }}
+            rows={2}
+            placeholder="e.g. Why is binary search O(log n)?"
+            style={{ marginBottom: 8 }}
+          />
+          <button className="btn btn-primary btn-block" onClick={ask} disabled={loading || !question.trim()}>
+            {loading ? "Thinking…" : "Ask"}
+          </button>
+          {error && <p style={{ color: "var(--color-accent-700)", fontSize: 12, marginTop: 8 }}>{error}</p>}
+          {answer && (
+            <div style={{ marginTop: 10, maxHeight: 260, overflowY: "auto", border: "1px solid var(--color-divider)", background: "var(--color-surface)", padding: "var(--space-3)", fontSize: 13.5, lineHeight: 1.55 }}>
+              {answer}
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }

@@ -1,253 +1,184 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { modules, lessonForDay, MILESTONES, TOTAL_DAYS, HOURS_PER_DAY } from "@/lib/curriculum";
-import { isModuleUnlocked, moduleProgress, summarizeProgress } from "@/lib/progress";
 import { useBootcamp } from "@/lib/store";
+import {
+  modules,
+  coreModules,
+  TOTAL_DAYS,
+  PROGRAM_DAYS,
+  lessonForDay,
+  MILESTONES,
+} from "@/lib/curriculum";
+import { summarizeProgress, isModuleUnlocked, moduleProgress } from "@/lib/progress";
 
 export default function Dashboard() {
   const hydrated = useBootcamp((s) => s.hasHydrated);
   const completedLessons = useBootcamp((s) => s.completedLessons);
   const startDate = useBootcamp((s) => s.startDate);
+  const activityDates = useBootcamp((s) => s.activityDates);
   const startJourney = useBootcamp((s) => s.startJourney);
-  const resetProgress = useBootcamp((s) => s.resetProgress);
   const authUser = useBootcamp((s) => s.authUser);
   const authReady = useBootcamp((s) => s.authReady);
 
   const completed = hydrated ? completedLessons : [];
-  const start = hydrated ? startDate : null;
-  const s = summarizeProgress(completed, start);
-  const completedSet = new Set(completed);
-
-  const dayStatus = (day: number) => {
-    const hit = lessonForDay(day);
-    if (!hit) return { status: "none" as const, hit };
-    if (completedSet.has(hit.lesson.id)) return { status: "done" as const, hit };
-    if (start && day === s.calendarDay) return { status: "today" as const, hit };
-    return { status: "todo" as const, hit };
-  };
+  const done = new Set(completed);
+  const s = summarizeProgress(completed, hydrated ? startDate : null, hydrated ? activityDates : []);
+  const day = Math.max(1, s.calendarDay || 1);
+  const todays = lessonForDay(day);
 
   return (
-    <div className="space-y-10">
+    <div style={{ padding: "var(--space-8)", display: "flex", flexDirection: "column", gap: "var(--space-8)", maxWidth: 1560, width: "100%", margin: "0 auto" }}>
       {authReady && !authUser && (
-        <div className="card flex flex-wrap items-center justify-between gap-3 border-neon/40 p-4">
-          <p className="text-sm text-slate-300">
-            👋 You're browsing as a <strong>guest</strong> — you can try the sample
-            lessons, but the full 60-day journey needs a free account so progress
-            saves and syncs.
-          </p>
-          <div className="flex gap-2">
-            <Link href="/signup" className="btn-primary text-xs">Create free account</Link>
-            <Link href="/learn/oop/classes-blueprints" className="btn-ghost text-xs">Try the sample</Link>
-          </div>
+        <div className="blueprint" style={{ padding: "var(--space-4) var(--space-6)", display: "flex", alignItems: "center", gap: "var(--space-4)", flexWrap: "wrap" }}>
+          <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
+          <span style={{ fontSize: 14 }}>
+            You're browsing as a <b>guest</b> — sample lessons are open; a free account saves your progress and unlocks everything.
+          </span>
+          <span style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
+            <Link href="/signup" className="btn btn-primary">Create account</Link>
+            <Link href="/learn/m1l1" className="btn btn-secondary">Try the sample</Link>
+          </span>
         </div>
       )}
-      {/* ---- header + strength meter ---- */}
-      <section>
-        <div className="mb-1 flex flex-wrap items-end justify-between gap-3">
-          <h1 className="text-3xl font-extrabold tracking-tight">
-            Your 60-Day Roadmap
+
+      {/* hero */}
+      <section style={{ display: "grid", gridTemplateColumns: "1.35fr 1fr", gap: "var(--space-8)", alignItems: "start" }} className="max-md:!grid-cols-1">
+        <div>
+          <div className="kicker" style={{ marginBottom: "var(--space-3)" }}>
+            60 days — 2 hours a day — Python — 0 to 100%
+          </div>
+          <h1 style={{ fontSize: 64, lineHeight: 0.95, margin: "0 0 var(--space-4)" }}>
+            DAY {day} <span style={{ color: "var(--color-neutral-500)" }}>/ {TOTAL_DAYS}</span>
           </h1>
-          {start ? (
-            <span className="rounded-full border border-ink-600 bg-ink-800 px-4 py-1.5 text-sm font-bold text-neon">
-              📅 Day {s.calendarDay} of {TOTAL_DAYS}
-            </span>
-          ) : (
-            <button className="btn-primary" onClick={startJourney}>
-              🚀 Start my 60-day journey
-            </button>
-          )}
-        </div>
-        <p className="mb-6 text-sm text-slate-400">
-          {HOURS_PER_DAY} hours a day. Each square is one day of material — finish a lesson and
-          its days light up green.
-        </p>
+          <p style={{ fontSize: 17, lineHeight: 1.55, maxWidth: "54ch", margin: "0 0 var(--space-6)", color: "var(--color-neutral-800)" }}>
+            {startDate
+              ? <>Today's material: <b>{todays.module.n}</b> — {todays.lesson.t}. {todays.lesson.a}.</>
+              : "Your 60-day run from zero to hero hasn't started yet. Day 1 is one click away — two focused hours, one lesson, one visualizer."}
+          </p>
 
-        <div className="card p-6">
-          <div className="mb-2 flex items-baseline justify-between">
-            <span className="text-sm font-bold uppercase tracking-widest text-slate-400">
-              💪 Coding strength
-            </span>
-            <span className="text-2xl font-extrabold text-neon-green">{s.strength}%</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)", maxWidth: 660 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "var(--font-heading)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-neutral-700)" }}>
+              <span>DSA mastery — one lesson moves it 2.5 points</span>
+              <span>{s.mastery}%</span>
+            </div>
+            <div style={{ position: "relative", height: 12, background: "var(--color-neutral-200)", border: "1px solid var(--color-divider)" }}>
+              <i style={{ position: "absolute", inset: "0 auto 0 0", width: `${s.mastery}%`, background: "var(--color-accent)", transition: "width .4s" }} />
+              {MILESTONES.map((m) => (
+                <i key={m.day} title={m.label} style={{ position: "absolute", top: 0, bottom: 0, left: `${m.strength}%`, width: 2, background: "var(--color-accent-800)", opacity: 0.65 }} />
+              ))}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "var(--space-2)" }}>
+              <Stat v={`${s.streak}d`} l="streak" />
+              <Stat v={`${s.xp}`} l="XP" />
+              <Stat v={`${s.hoursLogged}h`} l="hours logged" />
+              <Stat v={`${s.completedCount}/${s.totalLessons}`} l="lessons" />
+            </div>
           </div>
-          <div className="relative mb-6 h-4 overflow-hidden rounded-full bg-ink-700">
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-neon to-neon-green"
-              initial={{ width: 0 }}
-              animate={{ width: `${(s.strength / 100) * 100}%` }}
-              transition={{ type: "spring", stiffness: 60, damping: 20 }}
-            />
-            {MILESTONES.map((m) => (
-              <div
-                key={m.day}
-                className="absolute top-0 h-full w-0.5 bg-neon-amber/70"
-                style={{ left: `${m.strength}%` }}
-                title={m.label}
-              />
-            ))}
-          </div>
-          <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
-            <Stat label="Lessons done" value={`${s.completedCount}/${s.totalLessons}`} />
-            <Stat label="Hours logged" value={`${s.hoursLogged}h`} />
-            <Stat
-              label="Day-30 target"
-              value="80%"
-              hint={s.daysCompleted >= 30 ? "hit! 🎉" : `${Math.max(0, 30 - s.daysCompleted)} days left`}
-            />
-            <Stat
-              label="Pace"
-              value={
-                s.pace === "not-started"
-                  ? "—"
-                  : s.pace === "ahead"
-                    ? "🔥 Ahead"
-                    : s.pace === "on-track"
-                      ? "✅ On track"
-                      : "🐢 Behind"
-              }
-            />
+
+          <div style={{ marginTop: "var(--space-6)", display: "flex", gap: "var(--space-3)" }}>
+            {startDate ? (
+              <Link href={`/learn/${todays.lesson.id}`} className="btn btn-primary" style={{ fontSize: 15, padding: "10px 22px" }}>
+                Start today's session →
+              </Link>
+            ) : (
+              <button className="btn btn-primary" style={{ fontSize: 15, padding: "10px 22px" }} onClick={startJourney}>
+                Begin Day 1
+              </button>
+            )}
+            <Link href="/curriculum" className="btn btn-secondary" style={{ fontSize: 15 }}>Browse curriculum</Link>
           </div>
         </div>
-      </section>
 
-      {/* ---- 60-day grid ---- */}
-      <section>
-        <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
-          The 60 days
-        </h2>
-        <div className="card p-5">
-          <div className="grid grid-cols-10 gap-1.5 sm:gap-2">
-            {Array.from({ length: TOTAL_DAYS }, (_, i) => i + 1).map((day) => {
-              const { status, hit } = dayStatus(day);
-              const milestone = MILESTONES.find((m) => m.day === day);
-              const cell = (
-                <motion.div
-                  whileHover={{ scale: 1.15 }}
-                  className={`flex aspect-square items-center justify-center rounded-md font-mono text-[9px] font-bold transition-colors sm:text-[11px] ${
-                    status === "done"
-                      ? "bg-neon-green/80 text-ink-950"
-                      : status === "today"
-                        ? "bg-neon text-ink-950 shadow-glow"
-                        : "bg-ink-700 text-slate-400 hover:bg-ink-600"
-                  } ${milestone ? "ring-2 ring-neon-amber" : ""}`}
-                  title={
-                    (hit ? `Day ${day}: ${hit.lesson.title}` : `Day ${day}`) +
-                    (milestone ? ` — ${milestone.label}` : "")
-                  }
-                >
-                  {milestone ? "🏆" : day}
-                </motion.div>
-              );
-              return hit ? (
-                <Link key={day} href={`/learn/${hit.module.id}/${hit.lesson.id}`}>
-                  {cell}
+        {/* 60-day plan strip */}
+        <figure className="blueprint" style={{ margin: 0, padding: "var(--space-6)" }}>
+          <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
+          <div className="kicker" style={{ marginBottom: "var(--space-3)" }}>The {TOTAL_DAYS} days</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(10, 1fr)", gap: 4 }}>
+            {Array.from({ length: TOTAL_DAYS }, (_, i) => i + 1).map((d) => {
+              const hit = lessonForDay(d);
+              const isDone = done.has(hit.lesson.id);
+              const isToday = startDate && d === day;
+              return (
+                <Link key={d} href={`/learn/${hit.lesson.id}`} title={`Day ${d}: ${hit.lesson.t}`} className="zh-cell"
+                  style={{
+                    aspectRatio: "1", display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 10, fontFamily: "ui-monospace,monospace", textDecoration: "none",
+                    border: "1px solid var(--color-divider)",
+                    background: isDone ? "var(--color-accent)" : isToday ? "var(--color-accent-300)" : "var(--color-surface)",
+                    color: isDone ? "var(--color-bg)" : "var(--color-text)",
+                    outline: isToday ? "2px solid var(--color-accent-700)" : "none",
+                  }}>
+                  {d}
                 </Link>
-              ) : (
-                <div key={day}>{cell}</div>
               );
             })}
           </div>
-          <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-400">
-            <span className="flex items-center gap-1.5">
-              <i className="h-3 w-3 rounded-sm bg-neon-green/80" /> completed
-            </span>
-            <span className="flex items-center gap-1.5">
-              <i className="h-3 w-3 rounded-sm bg-neon" /> today
-            </span>
-            <span className="flex items-center gap-1.5">
-              <i className="h-3 w-3 rounded-sm bg-ink-700" /> upcoming
-            </span>
-            <span className="flex items-center gap-1.5">
-              <i className="h-3 w-3 rounded-sm ring-2 ring-neon-amber" /> milestone (Day 30 → 80%, Day 60 → 90%)
-            </span>
-          </div>
-        </div>
+          <figcaption style={{ marginTop: "var(--space-3)" }}>
+            filled = lesson complete · outlined = today · days 46–60 begin the advanced track (runs to day {PROGRAM_DAYS})
+          </figcaption>
+        </figure>
       </section>
 
-      {/* ---- modules ---- */}
+      {/* modules */}
       <section>
-        <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
-          Modules
-        </h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          {modules.map((mod) => {
-            const unlocked = isModuleUnlocked(mod, completed);
-            const pct = moduleProgress(mod, completed);
-            return (
-              <div
-                key={mod.id}
-                className={`card p-5 ${unlocked ? "" : "opacity-60"}`}
-              >
-                <div className="mb-1 flex items-center justify-between">
-                  <h3 className={`font-extrabold ${mod.color}`}>
-                    {mod.emoji} Module {mod.order}: {mod.title}
-                  </h3>
-                  {!unlocked && <span title="Finish the previous module to unlock">🔒</span>}
-                </div>
-                <p className="mb-3 text-xs text-slate-400">{mod.tagline}</p>
-                <div className="mb-3 h-2 overflow-hidden rounded-full bg-ink-700">
-                  <motion.div
-                    className="h-full rounded-full bg-gradient-to-r from-neon to-neon-purple"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${pct}%` }}
-                  />
-                </div>
-                <ul className="space-y-1.5">
-                  {mod.lessons.map((l) => {
-                    const done = completedSet.has(l.id);
-                    return (
-                      <li key={l.id}>
-                        {unlocked ? (
-                          <Link
-                            href={`/learn/${mod.id}/${l.id}`}
-                            className="group flex items-center justify-between rounded-lg px-2 py-1.5 text-sm hover:bg-ink-700"
-                          >
-                            <span className={done ? "text-slate-500 line-through" : "text-slate-200"}>
-                              {done ? "✅" : "○"} {l.emoji} {l.title}
-                            </span>
-                            <span className="font-mono text-[10px] text-slate-500 group-hover:text-neon">
-                              d{l.days[0]}–{l.days[1]}
-                            </span>
-                          </Link>
-                        ) : (
-                          <span className="flex items-center justify-between px-2 py-1.5 text-sm text-slate-500">
-                            <span>🔒 {l.emoji} {l.title}</span>
-                            <span className="font-mono text-[10px]">d{l.days[0]}–{l.days[1]}</span>
-                          </span>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
+        <h2 style={{ marginBottom: "var(--space-4)" }}>Core — the 0→100% track</h2>
+        <ModuleGrid mods={coreModules} allMods={modules} completed={completed} />
+        <h2 style={{ margin: "var(--space-8) 0 var(--space-4)" }}>Advanced — beyond the core</h2>
+        <ModuleGrid mods={modules.slice(4)} allMods={modules} completed={completed} />
       </section>
-
-      {start && (
-        <div className="text-right">
-          <button
-            className="text-xs text-slate-600 underline-offset-2 hover:text-neon-rose hover:underline"
-            onClick={() => {
-              if (confirm("Reset ALL progress? This cannot be undone.")) resetProgress();
-            }}
-          >
-            reset all progress
-          </button>
-        </div>
-      )}
     </div>
   );
 }
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function Stat({ v, l }: { v: string; l: string }) {
   return (
-    <div className="rounded-xl border border-ink-700 bg-ink-900/60 px-3 py-3">
-      <div className="text-lg font-extrabold text-slate-100">{value}</div>
-      <div className="text-[10px] uppercase tracking-widest text-slate-500">{label}</div>
-      {hint && <div className="mt-0.5 text-[10px] text-neon-amber">{hint}</div>}
+    <div style={{ border: "1px solid var(--color-divider)", background: "var(--color-surface)", padding: "var(--space-2) var(--space-3)" }}>
+      <div style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: 20 }}>{v}</div>
+      <div className="text-muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em" }}>{l}</div>
+    </div>
+  );
+}
+
+function ModuleGrid({ mods, allMods, completed }: {
+  mods: typeof modules; allMods: typeof modules; completed: string[];
+}) {
+  const done = new Set(completed);
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "var(--space-4)" }}>
+      {mods.map((m) => {
+        const idx = allMods.findIndex((x) => x.id === m.id);
+        const unlocked = isModuleUnlocked(idx, allMods, completed);
+        const pct = moduleProgress(m, completed);
+        return (
+          <div key={m.id} className="blueprint" style={{ padding: "var(--space-4)", opacity: unlocked ? 1 : 0.55 }}>
+            <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+              <span className="kicker">{m.n} · days {m.days[0]}–{m.days[1]}</span>
+              <span className="tag tag-outline mono" style={{ fontSize: 10 }}>{pct}%</span>
+            </div>
+            <h4 style={{ margin: "4px 0 4px" }}>{unlocked ? "" : "🔒 "}{m.name}</h4>
+            <p className="text-muted" style={{ fontSize: 12.5, marginBottom: "var(--space-3)" }}>{m.blurb}</p>
+            <div style={{ height: 6, background: "var(--color-neutral-200)", border: "1px solid var(--color-divider)", marginBottom: "var(--space-3)" }}>
+              <i style={{ display: "block", height: "100%", width: `${pct}%`, background: "var(--color-accent)" }} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {m.lessons.map((l, li) => (
+                unlocked ? (
+                  <Link key={l.id} href={`/learn/${l.id}`} className="zh-row" style={{ display: "flex", justifyContent: "space-between", gap: 8, padding: "4px 6px", textDecoration: "none", color: "inherit", fontSize: 13 }}>
+                    <span style={{ textDecoration: done.has(l.id) ? "line-through" : "none", color: done.has(l.id) ? "var(--color-neutral-500)" : "inherit" }}>
+                      {done.has(l.id) ? "■" : "□"} {li + 1}. {l.t}
+                    </span>
+                    <span className="mono text-muted" style={{ fontSize: 10, whiteSpace: "nowrap" }}>{l.a}</span>
+                  </Link>
+                ) : (
+                  <span key={l.id} className="text-muted" style={{ display: "flex", padding: "4px 6px", fontSize: 13 }}>□ {li + 1}. {l.t}</span>
+                )
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
