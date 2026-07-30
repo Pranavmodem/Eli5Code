@@ -9,8 +9,8 @@ export const runtime = "nodejs";
  */
 export async function POST(req: Request) {
   const apiKey = process.env.AI_API_KEY;
-  const baseUrl = (process.env.AI_API_URL ?? "https://api.bluesminds.com").replace(/\/$/, "");
-  const model = process.env.AI_MODEL ?? "moonshotai/kimi-k2.6";
+  const baseUrl = (process.env.AI_API_URL ?? "https://openrouter.ai/api").replace(/\/$/, "");
+  const model = process.env.AI_MODEL ?? "openai/gpt-4o";
 
   if (!apiKey) {
     return NextResponse.json(
