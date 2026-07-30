@@ -1,40 +1,100 @@
-# 🦸 ELI5Code — Zero to Hero Interactive Coding Bootcamp
+# 🧸 ELI5Code — Zero / Hero Coding Bootcamp
 
-Master **OOP, Data Structures, Algorithms & Big O** in 60 days at 2 hours/day —
-built for visual learners who need to *see* Bubble Sort happen, not read about it.
+**Live at [eli5code.com](https://www.eli5code.com)**
 
-## Core features
+Data structures & algorithms, explained like you're five — then flipped, with one
+switch, into precise technical language. 60 days, 2 hours a day, 0 → 100% DSA
+mastery, with an interactive visualizer in **every single lesson**.
 
-- **🧸 ELI5 / ⚙️ Tech toggle** — a global switch (navbar + every lesson) that flips
-  every explanation between a real-world analogy and proper technical jargon.
-- **🎬 A visualizer in EVERY lesson** (all 21) — step through algorithms
-  frame-by-frame with play / pause / step-forward / step-back / speed controls:
-  - OOP: blueprint→houses builder, encapsulation capsule, inheritance family
-    tree, polymorphism zoo, abstraction "under the hood"
-  - Data structures: array bookshelf, linked list treasure hunt, stack/queue
-    cafeteria, BST org chart, hash map dictionary drawers
-  - Algorithms: bubble / merge / quick sort with animated bar swaps, binary
-    search zone-chopping, BFS ripples & DFS maze on a live graph
-  - Big O: draggable growth chart (O(1)…O(n²)) and a space-complexity memory grid
-- **🔐 Accounts** — email + username + password signup (Supabase Auth) collecting
-  role, university, experience, and goal; guests can try sample lessons first.
-- **📈 60-day dashboard** — day-by-day roadmap paced at 2 hrs/day, milestone
-  markers at Day 30 (80% strength) and Day 60 (90%), and modules that unlock
-  as you complete the previous one.
-- **🤖 AI tutor** — floating ask-anything button that answers in ELI5 or Tech
-  style to match your toggle.
-- **☁️ Supabase sync** — progress persists locally (zustand + localStorage) and
-  syncs per user (or per anonymous device for guests). Works fully offline too.
+## Why it exists
+
+Most people don't fail DSA because it's hard — they fail because it's taught as
+walls of abstract text. ELI5Code anchors every concept to something you already
+understand (arrays are bookshelves, stacks are tray piles, Big O is two chefs
+cooking for a wedding), lets you *watch* the algorithm run step by step, and
+only then shows you the formal definition and the code.
+
+## Features
+
+### 🧸 ⇄ ⚙ The ELI5 / Tech toggle
+Every lesson is written twice: a vivid real-world analogy, and the precise
+technical version (invariants, complexity, edge cases). One switch — inside the
+lesson, right where the definition lives — flips between them. The AI tutor
+honors the same toggle.
+
+### ▶ A visualizer in all 80 lessons
+Every lesson ships a step-script rendered by one of 11 visual engines:
+
+| Engine | Used for |
+| --- | --- |
+| bars | bubble/selection/insertion/merge/quick sort, linear search, heaps |
+| cells | array indexing, binary search, two pointers, sliding window, bit tricks, DP rows |
+| nodes | linked lists (singly/doubly), LRU cache |
+| vstack / hqueue | stacks, call stacks, queues |
+| buckets | hash tables & collisions |
+| graph | BSTs, tries, BFS/DFS, Dijkstra, MSTs, topological sort, union-find |
+| matrix | polymorphism grids, O(n²) pair counting, Floyd–Warshall, knapsack/LCS/edit-distance DP tables |
+| panels / objects | OOP: classes vs instances, encapsulation, constructors |
+| chart | growth curves — O(1) vs O(log n) vs O(n) vs O(n²), amortized costs |
+
+Controls: play / pause / step forward / step back / speed. Frames pause on
+**predict challenges** ("will these two swap?") that make you commit before the
+reveal.
+
+### 📅 The 60-day dashboard
+- **DAY X / 60** hero with today's scheduled lesson
+- **DSA mastery bar** — one core lesson moves it 2.5 points; 80% by day 30, 100% by day 60
+- Clickable 60-day grid, streak, XP, and levels
+- Modules unlock at 70% completion of the previous one
+- An **advanced track** (modules 5–8: advanced data structures, graph
+  algorithms, algorithmic patterns, dynamic programming) continues to day 90
+
+### 📚 The curriculum — 8 modules × 10 lessons
+1. **OOP via Analogies** — classes as blueprints, inheritance as genetics, polymorphism as one message/many answers
+2. **Data Structures** — arrays, dynamic arrays, linked lists, stacks, queues, hash maps, BSTs, graphs
+3. **Algorithms in Motion** — five sorts, two searches, BFS/DFS, the call stack
+4. **Big O** — growth shapes, the handshake problem, space vs time, amortized analysis
+5. **Advanced Data Structures** — heaps, tries, union-find, segment/Fenwick trees, AVL, LRU, Bloom filters
+6. **Graph Algorithms** — Dijkstra, Bellman-Ford, Floyd–Warshall, toposort, Kruskal/Prim, A*, SCC, max-flow
+7. **Algorithmic Patterns** — two pointers, sliding window, prefix sums, backtracking, greedy, KMP, sweep line
+8. **Dynamic Programming** — memoization, knapsack, coins, LCS, edit distance, LIS, grid/tree/bitmask DP
+
+Each lesson also carries **Python and JavaScript implementations**, "how devs
+think" approach notes, "where it's used" real-world applications, and a quiz.
+
+### 🤖 AI tutor
+A floating ask-anything tutor on every page, answering in ELI5 or Tech style to
+match your toggle. Proxied server-side through an OpenAI-compatible endpoint
+(OpenRouter by default, free-tier model with automatic fallback) — the API key
+never reaches the browser.
+
+### 🎨 Two designed themes
+- **Light — "Industry"**: blueprint wireframe, steel accents, Barlow Condensed, registration marks
+- **Dark — "Nocturne"**: quiet compact dark, blurple accent, Inter
+
+Same design tokens, swapped per theme from the 🌙 toggle in the nav.
+
+### 🔐 Accounts, progress sync & admin
+- Email **or username** + password login (Supabase Auth)
+- Signup collects role, university, experience, and goal
+- Guests can try sample lessons; progress lives in localStorage and merges into
+  the account on first login
+- Per-user progress sync guarded by row-level security (own row only)
+- **Admin console** for administrators: every learner's profile, progress,
+  mastery, and provisioning credentials
+- Account page for changing email and password
 
 ## Tech stack
 
-Next.js 14 (App Router) · Tailwind CSS (dark-mode-first) · Zustand · Framer Motion · Supabase
+Next.js 14 (App Router) · TypeScript · Supabase (Auth + Postgres + RLS) ·
+Zustand · design-system CSS (no UI framework) · deployed on Vercel ·
+domain via IONOS DNS
 
 ## Local development
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in your values
+cp .env.example .env.local   # fill in values
 npm run dev                  # http://localhost:3000
 ```
 
@@ -43,28 +103,24 @@ npm run dev                  # http://localhost:3000
 | Variable | Where | Purpose |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | client | Supabase project URL (public) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | client | Supabase publishable key (public, RLS-guarded) |
-| `AI_API_URL` | **server only** | OpenAI-compatible endpoint for the AI tutor |
-| `AI_API_KEY` | **server only** | API key for the tutor — set in Vercel, never commit |
-| `AI_MODEL` | server | Model name (default `gpt-4o-mini`) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | client | publishable key (public, RLS-guarded) |
+| `AI_API_KEY` | **server only** | key for the AI tutor — set in Vercel, never commit |
+| `AI_API_URL` | server | OpenAI-compatible base URL (default: OpenRouter) |
+| `AI_MODEL` | server | model id (default: a free-tier model) |
 
-## Deploy to Vercel
+## Database
 
-1. Push this repo to GitHub and **Import Project** in Vercel — framework
-   auto-detects as Next.js; the default build (`next build`) just works.
-2. Add the environment variables above under *Settings → Environment Variables*.
-3. Deploy. 🎉
+Migrations live in `supabase/migrations/`:
+- `0001` guest progress table
+- `0002` profiles + per-user progress + signup trigger (RLS throughout)
+- `0003` admin flag, username→email login RPC
+- `0004` admin roster RPC + provisioning credentials (admin-only RLS)
+- `0005` security hardening (locked-down policies, revoked definer grants)
 
-## Supabase setup
+## Security posture
 
-Run `supabase/migrations/0001_progress.sql` against your project (SQL editor or
-`supabase db push`). It creates the `progress` table with RLS enabled.
-
-## Curriculum
-
-| Module | Days | Content |
-| --- | --- | --- |
-| 1 · 🏗️ OOP via Analogies | 1–12 | Classes as blueprints, objects as houses, inheritance as genetics, polymorphism as multi-tools |
-| 2 · 🗂️ Data Structures | 13–32 | Arrays as bookshelves, linked lists as treasure hunts, stacks/queues as cafeterias, trees as org charts, hash maps as dictionaries |
-| 3 · ⚡ Algorithms in Motion | 33–50 | Bubble/Merge/Quick sort, binary search, BFS/DFS |
-| 4 · 📈 Time & Space Complexity | 51–60 | Big O, O(1) vs O(n) vs O(n²), space trade-offs, building efficient systems |
+- All tables run with **row-level security**; users read/write only their own rows, admins read via a checked security-definer RPC
+- Passwords are bcrypt-hashed by Supabase Auth (never readable)
+- The AI key exists only as a server-side env var; the tutor endpoint is rate-limited per IP
+- Security headers (HSTS, nosniff, frame-deny, referrer & permissions policies) on every response
+- HTTPS everywhere via Vercel-managed certificates

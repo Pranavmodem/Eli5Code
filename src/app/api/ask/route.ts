@@ -6,6 +6,19 @@ export const maxDuration = 60;
 
 const FALLBACK_MODEL = "openai/gpt-oss-20b:free";
 
+// Naive per-IP rate limit (best-effort per serverless instance): 8 req/min.
+const hits = new Map<string, number[]>();
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const windowStart = now - 60_000;
+  const list = (hits.get(ip) ?? []).filter((t) => t > windowStart);
+  if (list.length >= 8) return true;
+  list.push(now);
+  hits.set(ip, list);
+  if (hits.size > 5000) hits.clear(); // bound memory
+  return false;
+}
+
 /**
  * AI tutor proxy. The API key lives ONLY in server env vars — it is never
  * shipped to the browser and never committed to git.
@@ -20,6 +33,14 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { error: "AI tutor isn't configured yet. Set AI_API_KEY in Vercel env vars." },
       { status: 503 }
+    );
+  }
+
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (rateLimited(ip)) {
+    return NextResponse.json(
+      { error: "Whoa — that's a lot of questions! Give it a minute and ask again." },
+      { status: 429 }
     );
   }
 

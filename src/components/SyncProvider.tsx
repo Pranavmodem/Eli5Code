@@ -2,24 +2,16 @@
 
 import { useEffect, useRef } from "react";
 import { useBootcamp } from "@/lib/store";
-import {
-  fetchProgress,
-  pushProgress,
-  fetchUserProgress,
-  pushUserProgress,
-} from "@/lib/supabase";
+import { fetchUserProgress, pushUserProgress } from "@/lib/supabase";
 
 /**
- * Keeps local zustand progress in sync with Supabase.
- * - Signed in: rows keyed by user id in `user_progress` (RLS: own row only).
- * - Guest: anonymous device-id row in `progress` (sample mode).
- * On identity change (login) the remote row is pulled and merged (union) so
- * guest sample progress carries into the account. Works fully offline too.
+ * Keeps progress in sync with Supabase for signed-in users (rows keyed by
+ * user id in `user_progress`, RLS: own row only). Guests are local-only —
+ * zustand persists to localStorage, and on first login the local state is
+ * merged (union) into the account row, so sample-lesson progress carries over.
  */
 export default function SyncProvider({ children }: { children: React.ReactNode }) {
-  const ensureDeviceId = useBootcamp((s) => s.ensureDeviceId);
   const mergeRemote = useBootcamp((s) => s.mergeRemote);
-  const deviceId = useBootcamp((s) => s.deviceId);
   const authUser = useBootcamp((s) => s.authUser);
   const authReady = useBootcamp((s) => s.authReady);
   const completedLessons = useBootcamp((s) => s.completedLessons);
@@ -29,23 +21,12 @@ export default function SyncProvider({ children }: { children: React.ReactNode }
   const pulledFor = useRef<string | null>(null);
   const pushesToSkip = useRef(1);
 
+  // Pull + merge once per signed-in identity
   useEffect(() => {
-    if (hydrated) ensureDeviceId();
-  }, [hydrated, ensureDeviceId]);
-
-  // Pull + merge whenever identity settles or changes (guest -> user, etc.)
-  const identity = authUser ? `user:${authUser.id}` : deviceId ? `device:${deviceId}` : null;
-
-  useEffect(() => {
-    if (!hydrated || !authReady || !identity || pulledFor.current === identity) return;
-    pulledFor.current = identity;
+    if (!hydrated || !authReady || !authUser || pulledFor.current === authUser.id) return;
+    pulledFor.current = authUser.id;
     pushesToSkip.current += 1; // the merge itself shouldn't trigger a push loop
-    const pull = authUser
-      ? fetchUserProgress(authUser.id)
-      : fetchProgress(deviceId!).then((r) =>
-          r ? { completed_lessons: r.completed_lessons, start_date: r.start_date, mode: r.mode } : null
-        );
-    pull.then((remote) => {
+    fetchUserProgress(authUser.id).then((remote) => {
       if (remote) {
         mergeRemote({
           completedLessons: remote.completed_lessons ?? [],
@@ -53,34 +34,25 @@ export default function SyncProvider({ children }: { children: React.ReactNode }
         });
       }
     });
-  }, [hydrated, authReady, identity, authUser, deviceId, mergeRemote]);
+  }, [hydrated, authReady, authUser, mergeRemote]);
 
-  // Debounced push on change
+  // Debounced push on change (signed-in only)
   useEffect(() => {
-    if (!hydrated || !authReady || !identity) return;
+    if (!hydrated || !authReady || !authUser) return;
     if (pushesToSkip.current > 0) {
       pushesToSkip.current -= 1;
       return;
     }
     const t = setTimeout(() => {
-      if (authUser) {
-        pushUserProgress(authUser.id, {
-          completed_lessons: completedLessons,
-          start_date: startDate,
-          mode,
-        });
-      } else if (deviceId) {
-        pushProgress({
-          device_id: deviceId,
-          completed_lessons: completedLessons,
-          start_date: startDate,
-          mode,
-        });
-      }
+      pushUserProgress(authUser.id, {
+        completed_lessons: completedLessons,
+        start_date: startDate,
+        mode,
+      });
     }, 800);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated, authReady, identity, completedLessons, startDate, mode]);
+  }, [hydrated, authReady, authUser?.id, completedLessons, startDate, mode]);
 
   return <>{children}</>;
 }
