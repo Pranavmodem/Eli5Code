@@ -13,20 +13,21 @@ export default function VizPlayer({ viz }: { viz: LessonViz }) {
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
+  const [predictMode, setPredictMode] = useState(false); // off by default — watch freely first
   const [answered, setAnswered] = useState<Record<number, "right" | "wrong">>({});
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const frame = frames[Math.min(idx, frames.length - 1)] as Frame;
   const predict = frame.predict as Predict | undefined;
-  const needsAnswer = !!predict && !answered[idx];
+  const needsAnswer = predictMode && !!predict && !answered[idx];
 
   useEffect(() => {
     if (!playing) return;
     timer.current = setInterval(() => {
       setIdx((i) => {
         const f = frames[i] as Frame;
-        if (f.predict && !answered[i]) {
-          setPlaying(false); // stop on an unanswered challenge
+        if (predictMode && f.predict && !answered[i]) {
+          setPlaying(false); // predict mode: stop on an unanswered challenge
           return i;
         }
         if (i >= frames.length - 1) {
@@ -39,7 +40,7 @@ export default function VizPlayer({ viz }: { viz: LessonViz }) {
     return () => {
       if (timer.current) clearInterval(timer.current);
     };
-  }, [playing, speed, frames, answered]);
+  }, [playing, speed, frames, answered, predictMode]);
 
   const goto = (i: number) => {
     setPlaying(false);
@@ -77,7 +78,7 @@ export default function VizPlayer({ viz }: { viz: LessonViz }) {
         </p>
       </div>
 
-      {predict && (
+      {predictMode && predict && (
         <div style={{ padding: "var(--space-3) var(--space-6)", borderTop: "1px dashed var(--color-divider)", display: "flex", alignItems: "center", gap: "var(--space-3)", flexWrap: "wrap", background: "color-mix(in srgb, var(--color-accent) 6%, transparent)" }}>
           <span className="kicker">Predict</span>
           <span style={{ fontSize: 13.5 }}>{predict.q}</span>
@@ -110,7 +111,20 @@ export default function VizPlayer({ viz }: { viz: LessonViz }) {
           </button>
         )}
         <button className="btn btn-secondary" onClick={() => goto(idx + 1)} disabled={idx >= frames.length - 1 || needsAnswer} aria-label="Step forward">▶</button>
-        <label style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, fontSize: 12 }} className="text-muted">
+        <label
+          style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, fontSize: 12, cursor: "pointer" }}
+          className="text-muted"
+          title="Pause at challenge points and call what happens next before it's revealed"
+        >
+          <input
+            type="checkbox"
+            checked={predictMode}
+            onChange={(e) => setPredictMode(e.target.checked)}
+            style={{ accentColor: "var(--color-accent)" }}
+          />
+          🎯 Predict mode
+        </label>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }} className="text-muted">
           speed
           <input type="range" min={0.5} max={3} step={0.5} value={speed} onChange={(e) => setSpeed(Number(e.target.value))} style={{ accentColor: "var(--color-accent)", width: 90 }} />
           <span className="mono">{speed}×</span>
