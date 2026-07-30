@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   const apiKey = process.env.AI_API_KEY;
   const baseUrl = (process.env.AI_API_URL ?? "https://openrouter.ai/api").replace(/\/$/, "");
-  const model = process.env.AI_MODEL ?? "openai/gpt-4o";
+  const model = process.env.AI_MODEL ?? "nvidia/nemotron-3-super-120b-a12b:free";
 
   if (!apiKey) {
     return NextResponse.json(
