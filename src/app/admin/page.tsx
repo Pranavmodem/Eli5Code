@@ -44,7 +44,7 @@ export default function AdminPage() {
         <table className="table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
           <thead>
             <tr style={{ borderBottom: "2px solid var(--color-divider)", textAlign: "left" }}>
-              {["Username", "Role", "University", "Experience", "Goal", "Lessons", "Mastery", "Last active", "Joined"].map((h) => (
+              {["Username", "Email", "Password", "Role", "University", "Experience", "Goal", "Lessons", "Mastery", "Last active", "Joined"].map((h) => (
                 <th key={h} className="kicker" style={{ padding: "8px 10px", fontSize: 10 }}>{h}</th>
               ))}
             </tr>
@@ -56,6 +56,10 @@ export default function AdminPage() {
                 <tr key={r.id} className="zh-row" style={{ borderBottom: "1px solid var(--color-divider)" }}>
                   <td style={{ padding: "8px 10px", fontWeight: 600 }}>
                     @{r.username} {r.is_admin && <span className="tag tag-accent" style={{ fontSize: 9 }}>admin</span>}
+                  </td>
+                  <td className="mono" style={{ padding: "8px 10px", fontSize: 12 }}>{r.email ?? "—"}</td>
+                  <td className="mono" style={{ padding: "8px 10px", fontSize: 12 }} title="Password assigned at provisioning — unknowable if the user has changed it since">
+                    {r.assigned_password ?? "set by user"}
                   </td>
                   <td style={{ padding: "8px 10px" }}>{r.role ?? "—"}</td>
                   <td style={{ padding: "8px 10px" }}>{r.university || "—"}</td>
@@ -73,7 +77,7 @@ export default function AdminPage() {
               );
             })}
             {rows?.length === 0 && (
-              <tr><td colSpan={9} className="text-muted" style={{ padding: 16, textAlign: "center" }}>No users yet.</td></tr>
+              <tr><td colSpan={11} className="text-muted" style={{ padding: 16, textAlign: "center" }}>No users yet.</td></tr>
             )}
           </tbody>
         </table>

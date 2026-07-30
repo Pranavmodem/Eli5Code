@@ -10,7 +10,7 @@
    light system stays readable: "neutral-800 text" is near-black on light
    and near-white on dark.
    ──────────────────────────────────────────────────────────────────────── */
-[data-theme="dark"] {
+html[data-theme="dark"] {
   --color-bg: #161826;
   --color-surface: #232532;
   --color-text: #e9e9ed;
