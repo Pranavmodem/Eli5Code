@@ -19,8 +19,6 @@ export default function NavBar() {
   const completedLessons = useBootcamp((s) => s.completedLessons);
   const startDate = useBootcamp((s) => s.startDate);
   const activityDates = useBootcamp((s) => s.activityDates);
-  const mode = useBootcamp((s) => s.mode);
-  const setMode = useBootcamp((s) => s.setMode);
   const theme = useBootcamp((s) => s.theme);
   const toggleTheme = useBootcamp((s) => s.toggleTheme);
   const authUser = useBootcamp((s) => s.authUser);
@@ -36,8 +34,6 @@ export default function NavBar() {
     hydrated ? startDate : null,
     hydrated ? activityDates : []
   );
-  const activeMode = hydrated ? mode : "eli5";
-
   return (
     <header
       className="nav"
@@ -82,16 +78,6 @@ export default function NavBar() {
         <span className="tag tag-neutral">{s.xp} XP</span>
         <span className="tag tag-neutral">Level {s.level}</span>
         <span className="tag tag-outline">DSA {s.mastery}%</span>
-      </div>
-
-      {/* ELI5 / Tech — global switch */}
-      <div className="seg" role="tablist" aria-label="Explanation mode">
-        {(["eli5", "tech"] as const).map((m) => (
-          <label key={m} className="seg-opt" style={{ background: activeMode === m ? "var(--color-accent)" : "transparent", color: activeMode === m ? "var(--color-bg)" : "inherit", cursor: "pointer" }}>
-            <input type="radio" name="mode" checked={activeMode === m} onChange={() => setMode(m)} />
-            {m === "eli5" ? "ELI5" : "Tech"}
-          </label>
-        ))}
       </div>
 
       <button

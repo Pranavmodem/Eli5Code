@@ -14,6 +14,7 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
   const hit = getLesson(lessonId);
   const hydrated = useBootcamp((s) => s.hasHydrated);
   const mode = useBootcamp((s) => s.mode);
+  const setMode = useBootcamp((s) => s.setMode);
   const completedLessons = useBootcamp((s) => s.completedLessons);
   const completeLesson = useBootcamp((s) => s.completeLesson);
   const uncompleteLesson = useBootcamp((s) => s.uncompleteLesson);
@@ -79,14 +80,27 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
         <h1 style={{ fontSize: 46, margin: 0 }}>{lesson.t}</h1>
       </header>
 
-      {/* explanation */}
+      {/* explanation — ELI5/Tech toggle lives here, next to the definition */}
       <section className="blueprint" style={{ padding: "var(--space-6)" }}>
         <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
-        <div style={{ display: "flex", alignItems: "baseline", gap: "var(--space-3)", marginBottom: "var(--space-3)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-3)", flexWrap: "wrap" }}>
           <span className="kicker">{activeMode === "eli5" ? "The analogy" : "Definition"}</span>
-          <span className="text-muted" style={{ fontSize: 11 }}>
-            switch ELI5 / Tech in the top bar to swap this explanation
-          </span>
+          <div className="seg" role="tablist" aria-label="Explanation mode" style={{ marginLeft: "auto" }}>
+            {(["eli5", "tech"] as const).map((m) => (
+              <label
+                key={m}
+                className="seg-opt"
+                style={{
+                  background: activeMode === m ? "var(--color-accent)" : "transparent",
+                  color: activeMode === m ? "var(--color-bg)" : "inherit",
+                  cursor: "pointer",
+                }}
+              >
+                <input type="radio" name="lesson-mode" checked={activeMode === m} onChange={() => setMode(m)} />
+                {m === "eli5" ? "🧸 ELI5" : "⚙ Tech"}
+              </label>
+            ))}
+          </div>
         </div>
         <p style={{ fontSize: 16, lineHeight: 1.65, margin: 0, color: "var(--color-neutral-800)", maxWidth: "72ch" }}>
           {body}
