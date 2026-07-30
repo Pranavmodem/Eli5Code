@@ -47,6 +47,7 @@ export default function AskAI() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const mode = useBootcamp((s) => s.mode);
+  const setMode = useBootcamp((s) => s.setMode);
   const pathname = usePathname();
 
   const ask = async () => {
@@ -88,9 +89,29 @@ export default function AskAI() {
           style={{ position: "fixed", bottom: 86, right: 22, zIndex: 50, width: "min(92vw, 380px)", background: "var(--color-bg)", boxShadow: "var(--shadow-lg)", padding: "var(--space-4)" }}
         >
           <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
-          <div className="kicker" style={{ marginBottom: 4 }}>AI tutor</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+            <span className="kicker">AI tutor</span>
+            <div className="seg" role="tablist" aria-label="Answer style" style={{ marginLeft: "auto" }}>
+              {(["eli5", "tech"] as const).map((m) => (
+                <label
+                  key={m}
+                  className="seg-opt"
+                  style={{
+                    padding: "4px 9px",
+                    fontSize: 11.5,
+                    background: mode === m ? "var(--color-accent)" : "transparent",
+                    color: mode === m ? "var(--color-bg)" : "inherit",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input type="radio" name="tutor-mode" checked={mode === m} onChange={() => setMode(m)} />
+                  {m === "eli5" ? "🧸 ELI5" : "⚙ Tech"}
+                </label>
+              ))}
+            </div>
+          </div>
           <p className="text-muted" style={{ fontSize: 12, marginBottom: "var(--space-3)" }}>
-            Stuck? Ask anything — answers come in <b>{mode === "eli5" ? "ELI5" : "technical"}</b> style to match your toggle.
+            Stuck? Ask anything — answers come in {mode === "eli5" ? "simple analogy" : "precise technical"} style.
           </p>
           <textarea
             className="input"
