@@ -434,7 +434,7 @@ function Matrix({ f }: { f: Frame }) {
 
 function Panels({ f }: { f: Frame }) {
   const panels = (f.panels as { title: string; rows: { t: string; s?: string }[] }[]) ?? [];
-  const log = (f.log as string[]) ?? [];
+  const log = (f.log as (string | { t: string; s?: string })[]) ?? [];
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
       <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.max(1, panels.length)}, 1fr)`, gap: "var(--space-4)" }}>
@@ -454,8 +454,16 @@ function Panels({ f }: { f: Frame }) {
         ))}
       </div>
       {log.length > 0 && (
-        <div className="mono text-muted" style={{ fontSize: 11, lineHeight: 1.7 }}>
-          {log.map((l, i) => <div key={i}>» {l}</div>)}
+        <div className="mono" style={{ fontSize: 11, lineHeight: 1.7 }}>
+          {log.map((entry, i) => {
+            // log entries are plain strings in some scripts, { t, s } in others
+            const l = typeof entry === "string" ? { t: entry, s: "" } : entry;
+            const color =
+              l.s === "bad" ? "var(--color-accent-800)"
+              : l.s === "on" ? "var(--color-text)"
+              : "var(--color-neutral-600)";
+            return <div key={i} style={{ color }}>» {l.t}</div>;
+          })}
         </div>
       )}
     </div>
@@ -494,16 +502,40 @@ function Objects({ f }: { f: Frame }) {
 const CHART_FN: Record<string, (x: number) => number> = {
   "1": () => 1,
   logn: (x) => Math.max(1, Math.log2(x)),
+  log: (x) => Math.max(1, Math.log2(x)),
   n: (x) => x,
   nlogn: (x) => Math.max(1, x * Math.log2(x)),
+  nlog: (x) => Math.max(1, x * Math.log2(x)),
   n2: (x) => x * x,
 };
 
+/** Curve keys used by scripts that pass series as bare strings. */
+const CURVE_META: Record<string, { name: string; c: string }> = {
+  "1": { name: "O(1)", c: "#0891b2" },
+  log: { name: "O(log n)", c: "#7c3aed" },
+  logn: { name: "O(log n)", c: "#7c3aed" },
+  n: { name: "O(n)", c: "#059669" },
+  nlog: { name: "O(n log n)", c: "#d97706" },
+  nlogn: { name: "O(n log n)", c: "#d97706" },
+  n2: { name: "O(n²)", c: "#e11d48" },
+};
+
+interface Series { k: string; mul: number; name: string; c: string }
+
 function Chart({ f }: { f: Frame }) {
-  const series = (f.series as { k: string; mul: number; name: string; c: string }[]) ?? [];
+  // amort-style frames carry per-append cost columns instead of curves
+  const cols = f.cols as { cost: number; spike?: boolean; label: string }[] | undefined;
+  if (Array.isArray(cols) && cols.length) return <CostBars cols={cols} avgLine={!!f.avgLine} />;
+
+  const series: Series[] = ((f.series as (string | Series)[]) ?? []).map((s) =>
+    typeof s === "string"
+      ? { k: s, mul: 1, name: CURVE_META[s]?.name ?? s, c: CURVE_META[s]?.c ?? "var(--color-accent)" }
+      : s
+  );
   const n = (f.n as number) ?? 64;
   const W = 560, H = 230, L = 44, B = 26;
-  const val = (s: { k: string; mul: number }, x: number) => (CHART_FN[s.k] ?? CHART_FN.n)(x) * s.mul;
+  const val = (s: { k: string; mul: number }, x: number) =>
+    (CHART_FN[s.k] ?? CHART_FN.n)(x) * (typeof s.mul === "number" ? s.mul : 1);
   const maxY = Math.max(10, ...series.map((s) => val(s, n)));
   const px = (x: number) => L + (x / n) * (W - L - 10);
   const py = (y: number) => (H - B) - (Math.log10(1 + y) / Math.log10(1 + maxY)) * (H - B - 12);
@@ -527,6 +559,56 @@ function Chart({ f }: { f: Frame }) {
             {s.name}
           </span>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Amortized-cost columns (e.g. dynamic array appends): most appends cost 1,
+ * occasional resizes spike, and the running average stays flat — which is the
+ * whole point of amortized analysis.
+ */
+function CostBars({ cols, avgLine }: { cols: { cost: number; spike?: boolean; label: string }[]; avgLine: boolean }) {
+  const max = Math.max(1, ...cols.map((c) => c.cost));
+  const avg = cols.reduce((s, c) => s + c.cost, 0) / Math.max(1, cols.length);
+  const H = 190;
+  return (
+    <div>
+      <div style={{ position: "relative", display: "flex", alignItems: "flex-end", gap: 3, height: H, borderBottom: "1px solid var(--color-divider)" }}>
+        {avgLine && (
+          <div
+            title={`running average ${avg.toFixed(2)} writes per append`}
+            style={{ position: "absolute", left: 0, right: 0, bottom: (avg / max) * (H - 10), height: 0, borderTop: "2px dashed var(--color-accent-700)", pointerEvents: "none" }}
+          />
+        )}
+        {cols.map((c, i) => (
+          <div key={i} style={{ flex: 1, minWidth: 6, display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", height: "100%" }}>
+            <div
+              title={`append ${c.label}: ${c.cost} write${c.cost === 1 ? "" : "s"}${c.spike ? " (resize)" : ""}`}
+              style={{
+                width: "100%",
+                height: Math.max(2, (c.cost / max) * (H - 10)),
+                background: c.spike ? "var(--color-accent)" : "var(--color-neutral-400)",
+                transition: "height .25s",
+              }}
+            />
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }} className="text-muted">
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11.5 }}>
+          <i style={{ width: 10, height: 10, background: "var(--color-neutral-400)", display: "inline-block" }} /> one write
+        </span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11.5 }}>
+          <i style={{ width: 10, height: 10, background: "var(--color-accent)", display: "inline-block" }} /> resize + copy
+        </span>
+        {avgLine && (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11.5 }}>
+            <i style={{ width: 14, height: 0, borderTop: "2px dashed var(--color-accent-700)", display: "inline-block" }} />
+            running average {avg.toFixed(2)}
+          </span>
+        )}
       </div>
     </div>
   );
