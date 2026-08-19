@@ -27,6 +27,9 @@ interface BootcampState {
   completedLessons: string[];
   /** yyyy-mm-dd days with activity — drives the streak tag */
   activityDates: string[];
+  /** Whose progress the local copy belongs to: a user id, or null for a guest.
+   *  Progress is per-account, so switching identity must never carry it over. */
+  progressOwner: string | null;
   theme: Theme;
   hasHydrated: boolean;
 
@@ -39,6 +42,15 @@ interface BootcampState {
   completeLesson: (lessonId: string) => void;
   uncompleteLesson: (lessonId: string) => void;
   mergeRemote: (remote: { completedLessons?: string[]; startDate?: string | null }) => void;
+  /** Replace local progress with this account's server copy. */
+  adoptRemote: (
+    owner: string,
+    remote: { completedLessons?: string[]; startDate?: string | null } | null
+  ) => void;
+  /** Keep the current local progress and attach it to this account. */
+  claimLocalFor: (owner: string) => void;
+  /** Wipe progress back to a clean guest slate (used on sign-out). */
+  resetToGuest: () => void;
   resetProgress: () => void;
   setHasHydrated: (v: boolean) => void;
 }
@@ -54,6 +66,7 @@ export const useBootcamp = create<BootcampState>()(
       startDate: null,
       completedLessons: [],
       activityDates: [],
+      progressOwner: null,
       theme: "light",
       hasHydrated: false,
 
@@ -100,7 +113,20 @@ export const useBootcamp = create<BootcampState>()(
         set({ completedLessons: merged, startDate });
       },
 
-      resetProgress: () => set({ completedLessons: [], startDate: null }),
+      adoptRemote: (owner, remote) =>
+        set({
+          progressOwner: owner,
+          completedLessons: remote?.completedLessons ?? [],
+          startDate: remote?.startDate ?? null,
+          activityDates: [],
+        }),
+
+      claimLocalFor: (owner) => set({ progressOwner: owner }),
+
+      resetToGuest: () =>
+        set({ progressOwner: null, completedLessons: [], startDate: null, activityDates: [] }),
+
+      resetProgress: () => set({ completedLessons: [], startDate: null, activityDates: [] }),
       setHasHydrated: (v) => set({ hasHydrated: v }),
     }),
     {
@@ -112,6 +138,7 @@ export const useBootcamp = create<BootcampState>()(
         startDate: s.startDate,
         completedLessons: s.completedLessons,
         activityDates: s.activityDates,
+        progressOwner: s.progressOwner,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
