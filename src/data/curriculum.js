@@ -91,8 +91,8 @@ export const MODULES = [
         k: 'A tree is an acyclic connected graph with a root and a parent-child hierarchy. In a balanced binary search tree the ordering invariant lets you discard half the remaining nodes at each step, giving O(log n) search, insert and delete.',
         q: { q: 'Search in a balanced BST costs…', o: ['O(1)', 'O(log n)', 'O(n)'], x: 1, w: 'Each comparison discards half the tree.' } },
       { id: 'm2l10', t: 'Graphs as Friendship Maps', a: 'Everyone knows everyone', v: 'graph',
-        e: 'A friendship map is messier than an org chart: friendship goes both ways, circles loop back on each other, and there is no single person at the top. A graph is just dots (people) joined by lines (relationships).',
-        k: 'A graph is a set of vertices and edges, directed or undirected, possibly cyclic. It is stored as an adjacency list (space O(V+E), good for sparse graphs) or an adjacency matrix (O(V²), constant-time edge lookup).',
+        e: 'A friendship map is messier than an org chart: friendship goes both ways, circles loop back on each other, and there is no single person at the top. A graph is just dots (people) joined by lines (relationships). And here is the family secret: the org chart from last lesson IS one of these — a tree is simply a graph that happens to have no loops and one person at the top.',
+        k: 'A graph is a set of vertices and edges, directed or undirected, possibly cyclic. It is stored as an adjacency list (space O(V+E), good for sparse graphs) or an adjacency matrix (O(V²), constant-time edge lookup). A tree is exactly the special case: a connected, acyclic graph with a designated root — every tree is a graph; most graphs are not trees.',
         q: { q: 'A tree is…', o: ['Unrelated to graphs', 'A connected acyclic graph', 'A graph with a matrix'], x: 1, w: 'Every tree is a graph — just one with no cycles and a root.' } }
     ]
   },

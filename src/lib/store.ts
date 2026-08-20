@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 
 export type Mode = "eli5" | "tech";
 export type Theme = "light" | "dark";
+export type Lang = "py" | "js";
 
 export interface AuthUser {
   id: string;
@@ -19,6 +20,8 @@ interface BootcampState {
   setAuth: (user: AuthUser | null) => void;
   /** Global explanation mode: ELI5 analogies vs technical jargon */
   mode: Mode;
+  /** Preferred programming language — drives deep-dive sections, code tabs and the practice editor */
+  lang: Lang;
   /** Anonymous id used to sync progress to Supabase without an account */
   deviceId: string | null;
   /** ISO date the user started the 60-day journey */
@@ -45,6 +48,7 @@ interface BootcampState {
   toggleTheme: () => void;
   setMode: (mode: Mode) => void;
   toggleMode: () => void;
+  setLang: (lang: Lang) => void;
   ensureDeviceId: () => void;
   startJourney: () => void;
   completeLesson: (lessonId: string) => void;
@@ -86,6 +90,7 @@ export const useBootcamp = create<BootcampState>()(
       authReady: false,
       setAuth: (user) => set({ authUser: user, authReady: true }),
       mode: "eli5",
+      lang: "py",
       deviceId: null,
       startDate: null,
       completedLessons: [],
@@ -102,6 +107,7 @@ export const useBootcamp = create<BootcampState>()(
       toggleTheme: () => set({ theme: get().theme === "light" ? "dark" : "light" }),
       setMode: (mode) => set({ mode }),
       toggleMode: () => set({ mode: get().mode === "eli5" ? "tech" : "eli5" }),
+      setLang: (lang) => set({ lang }),
 
       ensureDeviceId: () => {
         if (!get().deviceId && typeof crypto !== "undefined") {
@@ -210,6 +216,7 @@ export const useBootcamp = create<BootcampState>()(
       name: "zero-to-hero-progress",
       partialize: (s) => ({
         mode: s.mode,
+        lang: s.lang,
         theme: s.theme,
         deviceId: s.deviceId,
         startDate: s.startDate,

@@ -64,10 +64,23 @@ Each lesson also carries **Python and JavaScript implementations**, "how devs
 think" approach notes, "where it's used" real-world applications, and a quiz
 whose answers are **saved to your account**.
 
-### ⌨️ Practice — write real code
+### 🐍 Choose your language — Python or JavaScript
+A site-wide language toggle drives the whole learning surface: the in-depth
+reference sections, the default code tab, and the practice editor all follow it.
+
+### 📖 "In depth" — the full reference, per language
+Lessons carry a reference layer beyond the analogy: complete tables (every
+Python data type with its actual memory cost, every operation of a structure
+with its complexity, the whole sorting scoreboard), the rules that bite in
+practice, and runnable proof snippets — written separately for Python and
+JavaScript and swapped by the language toggle.
+
+### ⌨️ Practice — write real code, in Python or JavaScript
 Core lessons include a **built-in code editor with an instant test runner**:
-starter code, a task, and unit tests executed in a sandboxed Web Worker in your
-browser (infinite loops are killed after 3s). Passing earns XP and is recorded.
+starter code, a task, and unit tests — solvable in **Python** (a real CPython
+runtime, Pyodide, loaded in your browser on first run) or **JavaScript**, both
+executed in a sandboxed Web Worker (infinite loops are killed by a timeout).
+Passing earns XP and is recorded.
 
 ### 📝 Notes, bookmarks, cheatsheets
 A notes box on every lesson (synced per account; local for guests), star-to-

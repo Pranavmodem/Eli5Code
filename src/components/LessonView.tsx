@@ -6,6 +6,7 @@ import { useBootcamp } from "@/lib/store";
 import { getLesson, nextLesson, prevLesson, dayOfLesson } from "@/lib/curriculum";
 import { vizForLesson, usesForLesson, approachForLesson } from "@/lib/viz";
 import VizPlayer from "./VizPlayer";
+import DeepDive from "./DeepDive";
 import PracticePanel from "./PracticePanel";
 import NotesPanel from "./NotesPanel";
 import FeedbackWidget from "./FeedbackWidget";
@@ -27,7 +28,8 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
   const setQuizResult = useBootcamp((s) => s.setQuizResult);
   const bookmarks = useBootcamp((s) => s.bookmarks);
   const toggleBookmark = useBootcamp((s) => s.toggleBookmark);
-  const [tab, setTab] = useState<"python" | "js" | "approach" | "applied">("python");
+  const lang = useBootcamp((s) => s.lang);
+  const [tab, setTab] = useState<"python" | "js" | "approach" | "applied" | null>(null);
 
   const viz = useMemo(() => (hit ? vizForLesson(hit.lesson.id) : null), [hit]);
 
@@ -41,6 +43,9 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
   const approach = approachForLesson(lesson.id, lesson.ap);
   const py = viz?.py ?? lesson.py;
   const quizPick = hydrated ? (quizResults[lesson.id] ?? null) : null;
+  // No explicit tab picked yet → follow the site-wide language preference.
+  const langDefaultTab = hydrated && lang === "js" && viz?.code ? "js" : py ? "python" : viz?.code ? "js" : approach ? "approach" : "applied";
+  const activeTab = tab ?? langDefaultTab;
   const isBookmarked = hydrated && bookmarks.includes(lesson.id);
   const isGuestLocked = authReady && !authUser && !SAMPLE_LESSONS.includes(lesson.id);
 
@@ -128,23 +133,26 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
       {/* visualizer */}
       {viz && <VizPlayer key={lesson.id} viz={viz} />}
 
-      {/* code / approach / applied */}
+      {/* in-depth reference — swaps with the 🐍/JS language toggle */}
+      <DeepDive lessonId={lesson.id} />
+
+      {/* code / approach / applied — the code tab follows the language toggle by default */}
       {(py || viz?.code || approach || uses) && (
         <section>
           <div className="seg" style={{ marginBottom: "var(--space-3)" }}>
-            {py && <Tab id="python" cur={tab} set={setTab}>Python</Tab>}
-            {viz?.code && <Tab id="js" cur={tab} set={setTab}>JavaScript</Tab>}
-            {approach && <Tab id="approach" cur={tab} set={setTab}>How devs think</Tab>}
-            {uses && <Tab id="applied" cur={tab} set={setTab}>Where it's used</Tab>}
+            {py && <Tab id="python" cur={activeTab} set={setTab}>Python</Tab>}
+            {viz?.code && <Tab id="js" cur={activeTab} set={setTab}>JavaScript</Tab>}
+            {approach && <Tab id="approach" cur={activeTab} set={setTab}>How devs think</Tab>}
+            {uses && <Tab id="applied" cur={activeTab} set={setTab}>Where it's used</Tab>}
           </div>
-          {tab === "python" && py && <pre className="codeblock">{py}</pre>}
-          {tab === "js" && viz?.code && <pre className="codeblock">{viz.code}</pre>}
-          {tab === "approach" && approach && (
+          {activeTab === "python" && py && <pre className="codeblock">{py}</pre>}
+          {activeTab === "js" && viz?.code && <pre className="codeblock">{viz.code}</pre>}
+          {activeTab === "approach" && approach && (
             <ul style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8, fontSize: 14, lineHeight: 1.6, color: "var(--color-neutral-800)" }}>
               {approach.map((p, i) => <li key={i}>{p}</li>)}
             </ul>
           )}
-          {tab === "applied" && uses && (
+          {activeTab === "applied" && uses && (
             <ul style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8, fontSize: 14, lineHeight: 1.6, color: "var(--color-neutral-800)" }}>
               {uses.map((p, i) => <li key={i}>{p}</li>)}
             </ul>
