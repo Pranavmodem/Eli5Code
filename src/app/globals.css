@@ -151,3 +151,11 @@ body {
   line-height: 1.5;
   color: var(--color-neutral-800);
 }
+
+/* ── print (cheatsheets & certificate) ─────────────────────────────────── */
+@media print {
+  .nav, footer, .print-hide, button[aria-label="Ask the AI tutor"] {
+    display: none !important;
+  }
+  body { background: #fff; }
+}

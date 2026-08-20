@@ -2,6 +2,7 @@
 // renderers actually consume. Catches values that would be rendered as React
 // children but aren't primitives (the "Objects are not valid as a React child" crash).
 import { VIZ_OF, FAMILY, buildFrames } from "./src/data/visualizers.js";
+import { VIZ_OF_M0, FAMILY_M0, buildM0 } from "./src/data/visualizers-m0.js";
 import { VIZ_OF_ADV, FAMILY_ADV, buildAdv } from "./src/data/visualizers-adv.js";
 
 const bad = [];
@@ -137,10 +138,11 @@ const run = (map, famMap, build) => {
   }
 };
 
+run(VIZ_OF_M0, FAMILY_M0, buildM0);
 run(VIZ_OF, FAMILY, buildFrames);
 run(VIZ_OF_ADV, FAMILY_ADV, buildAdv);
 
-console.log(`checked ${Object.keys(VIZ_OF).length + Object.keys(VIZ_OF_ADV).length} visualizers, ${frameCount} frames`);
+console.log(`checked ${Object.keys(VIZ_OF_M0).length + Object.keys(VIZ_OF).length + Object.keys(VIZ_OF_ADV).length} visualizers, ${frameCount} frames`);
 if (bad.length === 0) console.log("ALL CLEAN ✓");
 else {
   console.log(`\n${bad.length} PROBLEM(S):`);

@@ -30,6 +30,14 @@ interface BootcampState {
   /** Whose progress the local copy belongs to: a user id, or null for a guest.
    *  Progress is per-account, so switching identity must never carry it over. */
   progressOwner: string | null;
+  /** lessonId -> option index the learner picked (right or wrong — it's kept) */
+  quizResults: Record<string, number>;
+  /** lesson ids whose coding exercise passed all tests */
+  passedExercises: string[];
+  /** starred lesson ids */
+  bookmarks: string[];
+  /** capstone milestone checklist: "projectId:stepIndex" -> done */
+  capstoneChecks: Record<string, boolean>;
   theme: Theme;
   hasHydrated: boolean;
 
@@ -41,11 +49,27 @@ interface BootcampState {
   startJourney: () => void;
   completeLesson: (lessonId: string) => void;
   uncompleteLesson: (lessonId: string) => void;
-  mergeRemote: (remote: { completedLessons?: string[]; startDate?: string | null }) => void;
+  setQuizResult: (lessonId: string, pick: number) => void;
+  passExercise: (lessonId: string) => void;
+  toggleBookmark: (lessonId: string) => void;
+  setCapstoneCheck: (key: string, done: boolean) => void;
+  mergeRemote: (remote: {
+    completedLessons?: string[];
+    startDate?: string | null;
+    quizResults?: Record<string, number>;
+    passedExercises?: string[];
+    bookmarks?: string[];
+  }) => void;
   /** Replace local progress with this account's server copy. */
   adoptRemote: (
     owner: string,
-    remote: { completedLessons?: string[]; startDate?: string | null } | null
+    remote: {
+      completedLessons?: string[];
+      startDate?: string | null;
+      quizResults?: Record<string, number>;
+      passedExercises?: string[];
+      bookmarks?: string[];
+    } | null
   ) => void;
   /** Keep the current local progress and attach it to this account. */
   claimLocalFor: (owner: string) => void;
@@ -67,6 +91,10 @@ export const useBootcamp = create<BootcampState>()(
       completedLessons: [],
       activityDates: [],
       progressOwner: null,
+      quizResults: {},
+      passedExercises: [],
+      bookmarks: [],
+      capstoneChecks: {},
       theme: "light",
       hasHydrated: false,
 
@@ -101,6 +129,37 @@ export const useBootcamp = create<BootcampState>()(
       uncompleteLesson: (lessonId) =>
         set({ completedLessons: get().completedLessons.filter((id) => id !== lessonId) }),
 
+      setQuizResult: (lessonId, pick) => {
+        const { quizResults, activityDates } = get();
+        const today = new Date().toISOString().slice(0, 10);
+        set({
+          quizResults: { ...quizResults, [lessonId]: pick },
+          activityDates: activityDates.includes(today) ? activityDates : [...activityDates, today],
+        });
+      },
+
+      passExercise: (lessonId) => {
+        const { passedExercises, activityDates } = get();
+        if (passedExercises.includes(lessonId)) return;
+        const today = new Date().toISOString().slice(0, 10);
+        set({
+          passedExercises: [...passedExercises, lessonId],
+          activityDates: activityDates.includes(today) ? activityDates : [...activityDates, today],
+        });
+      },
+
+      toggleBookmark: (lessonId) => {
+        const { bookmarks } = get();
+        set({
+          bookmarks: bookmarks.includes(lessonId)
+            ? bookmarks.filter((id) => id !== lessonId)
+            : [...bookmarks, lessonId],
+        });
+      },
+
+      setCapstoneCheck: (key, done) =>
+        set({ capstoneChecks: { ...get().capstoneChecks, [key]: done } }),
+
       mergeRemote: (remote) => {
         const local = get();
         const merged = Array.from(
@@ -110,7 +169,15 @@ export const useBootcamp = create<BootcampState>()(
           local.startDate && remote.startDate
             ? (local.startDate < remote.startDate ? local.startDate : remote.startDate)
             : local.startDate ?? remote.startDate ?? null;
-        set({ completedLessons: merged, startDate });
+        set({
+          completedLessons: merged,
+          startDate,
+          quizResults: { ...(remote.quizResults ?? {}), ...local.quizResults },
+          passedExercises: Array.from(
+            new Set([...local.passedExercises, ...(remote.passedExercises ?? [])])
+          ),
+          bookmarks: Array.from(new Set([...local.bookmarks, ...(remote.bookmarks ?? [])])),
+        });
       },
 
       adoptRemote: (owner, remote) =>
@@ -118,15 +185,25 @@ export const useBootcamp = create<BootcampState>()(
           progressOwner: owner,
           completedLessons: remote?.completedLessons ?? [],
           startDate: remote?.startDate ?? null,
+          quizResults: remote?.quizResults ?? {},
+          passedExercises: remote?.passedExercises ?? [],
+          bookmarks: remote?.bookmarks ?? [],
           activityDates: [],
         }),
 
       claimLocalFor: (owner) => set({ progressOwner: owner }),
 
       resetToGuest: () =>
-        set({ progressOwner: null, completedLessons: [], startDate: null, activityDates: [] }),
+        set({
+          progressOwner: null, completedLessons: [], startDate: null, activityDates: [],
+          quizResults: {}, passedExercises: [], bookmarks: [],
+        }),
 
-      resetProgress: () => set({ completedLessons: [], startDate: null, activityDates: [] }),
+      resetProgress: () =>
+        set({
+          completedLessons: [], startDate: null, activityDates: [],
+          quizResults: {}, passedExercises: [],
+        }),
       setHasHydrated: (v) => set({ hasHydrated: v }),
     }),
     {
@@ -139,6 +216,10 @@ export const useBootcamp = create<BootcampState>()(
         completedLessons: s.completedLessons,
         activityDates: s.activityDates,
         progressOwner: s.progressOwner,
+        quizResults: s.quizResults,
+        passedExercises: s.passedExercises,
+        bookmarks: s.bookmarks,
+        capstoneChecks: s.capstoneChecks,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);

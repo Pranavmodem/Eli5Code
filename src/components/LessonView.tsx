@@ -6,9 +6,12 @@ import { useBootcamp } from "@/lib/store";
 import { getLesson, nextLesson, prevLesson, dayOfLesson } from "@/lib/curriculum";
 import { vizForLesson, usesForLesson, approachForLesson } from "@/lib/viz";
 import VizPlayer from "./VizPlayer";
+import PracticePanel from "./PracticePanel";
+import NotesPanel from "./NotesPanel";
+import FeedbackWidget from "./FeedbackWidget";
 
 /** Lessons guests can try without an account. */
-const SAMPLE_LESSONS = ["m1l1", "m3l1"];
+const SAMPLE_LESSONS = ["m0l1", "m1l1", "m3l1"];
 
 export default function LessonView({ lessonId }: { lessonId: string }) {
   const hit = getLesson(lessonId);
@@ -20,8 +23,10 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
   const uncompleteLesson = useBootcamp((s) => s.uncompleteLesson);
   const authUser = useBootcamp((s) => s.authUser);
   const authReady = useBootcamp((s) => s.authReady);
-
-  const [quizPick, setQuizPick] = useState<number | null>(null);
+  const quizResults = useBootcamp((s) => s.quizResults);
+  const setQuizResult = useBootcamp((s) => s.setQuizResult);
+  const bookmarks = useBootcamp((s) => s.bookmarks);
+  const toggleBookmark = useBootcamp((s) => s.toggleBookmark);
   const [tab, setTab] = useState<"python" | "js" | "approach" | "applied">("python");
 
   const viz = useMemo(() => (hit ? vizForLesson(hit.lesson.id) : null), [hit]);
@@ -35,6 +40,8 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
   const uses = usesForLesson(lesson.id) ?? lesson.use;
   const approach = approachForLesson(lesson.id, lesson.ap);
   const py = viz?.py ?? lesson.py;
+  const quizPick = hydrated ? (quizResults[lesson.id] ?? null) : null;
+  const isBookmarked = hydrated && bookmarks.includes(lesson.id);
   const isGuestLocked = authReady && !authUser && !SAMPLE_LESSONS.includes(lesson.id);
 
   if (isGuestLocked) {
@@ -45,7 +52,7 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
           <div className="kicker" style={{ marginBottom: "var(--space-2)" }}>{mod.n} · {lesson.a}</div>
           <h2 style={{ marginBottom: "var(--space-3)" }}>{lesson.t}</h2>
           <p className="text-muted" style={{ marginBottom: "var(--space-6)" }}>
-            This lesson — and 79 more, each with its own step-through visualizer — unlocks
+            This lesson — and 88 more, each with its own step-through visualizer — unlocks
             with a free account, so your progress saves and syncs.
           </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
@@ -75,9 +82,20 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
       </nav>
 
       {/* header */}
-      <header>
-        <div className="kicker" style={{ marginBottom: 4 }}>{lesson.a}</div>
-        <h1 className="h-page" style={{ margin: 0 }}>{lesson.t}</h1>
+      <header style={{ display: "flex", alignItems: "flex-start", gap: "var(--space-3)" }}>
+        <div style={{ flex: 1 }}>
+          <div className="kicker" style={{ marginBottom: 4 }}>{lesson.a}</div>
+          <h1 className="h-page" style={{ margin: 0 }}>{lesson.t}</h1>
+        </div>
+        <button
+          className="btn btn-secondary"
+          onClick={() => toggleBookmark(lesson.id)}
+          title={isBookmarked ? "Remove bookmark" : "Bookmark this lesson"}
+          aria-label="Bookmark lesson"
+          style={{ fontSize: 16, color: isBookmarked ? "var(--color-accent)" : undefined }}
+        >
+          {isBookmarked ? "★" : "☆"}
+        </button>
       </header>
 
       {/* explanation — ELI5/Tech toggle lives here, next to the definition */}
@@ -146,7 +164,7 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
               const isRight = i === lesson.q!.x;
               const revealed = quizPick != null;
               return (
-                <button key={i} className="btn btn-secondary" onClick={() => setQuizPick(i)}
+                <button key={i} className="btn btn-secondary" onClick={() => setQuizResult(lesson.id, i)}
                   style={{
                     justifyContent: "flex-start", textAlign: "left", fontFamily: "var(--font-body)", fontWeight: 400,
                     borderColor: revealed && isRight ? "var(--color-accent)" : picked ? "var(--color-neutral-500)" : undefined,
@@ -166,6 +184,13 @@ export default function LessonView({ lessonId }: { lessonId: string }) {
           )}
         </section>
       )}
+
+      {/* practice + notes + feedback */}
+      <PracticePanel lessonId={lesson.id} />
+      <NotesPanel lessonId={lesson.id} />
+      <div>
+        <FeedbackWidget lessonId={lesson.id} />
+      </div>
 
       {/* footer nav */}
       <footer style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", borderTop: "1px solid var(--color-divider)", paddingTop: "var(--space-4)" }}>

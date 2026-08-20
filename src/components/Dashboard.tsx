@@ -17,13 +17,15 @@ export default function Dashboard() {
   const completedLessons = useBootcamp((s) => s.completedLessons);
   const startDate = useBootcamp((s) => s.startDate);
   const activityDates = useBootcamp((s) => s.activityDates);
+  const passedExercises = useBootcamp((s) => s.passedExercises);
+  const quizResults = useBootcamp((s) => s.quizResults);
   const startJourney = useBootcamp((s) => s.startJourney);
   const authUser = useBootcamp((s) => s.authUser);
   const authReady = useBootcamp((s) => s.authReady);
 
   const completed = hydrated ? completedLessons : [];
   const done = new Set(completed);
-  const s = summarizeProgress(completed, hydrated ? startDate : null, hydrated ? activityDates : []);
+  const s = summarizeProgress(completed, hydrated ? startDate : null, hydrated ? activityDates : [], new Date(), hydrated ? { passedExercises, quizResults } : {});
   const day = Math.max(1, s.calendarDay || 1);
   const todays = lessonForDay(day);
 
@@ -37,7 +39,7 @@ export default function Dashboard() {
           </span>
           <span style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
             <Link href="/signup" className="btn btn-primary">Create account</Link>
-            <Link href="/learn/m1l1" className="btn btn-secondary">Try the sample</Link>
+            <Link href="/learn/m0l1" className="btn btn-secondary">Try the sample</Link>
           </span>
         </div>
       )}
@@ -59,7 +61,7 @@ export default function Dashboard() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)", maxWidth: 660 }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "var(--font-heading)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-neutral-700)" }}>
-              <span>DSA mastery — one lesson moves it 2.5 points</span>
+              <span>DSA mastery — one core lesson moves it 2 points</span>
               <span>{s.mastery}%</span>
             </div>
             <div style={{ position: "relative", height: 12, background: "var(--color-neutral-200)", border: "1px solid var(--color-divider)" }}>
@@ -88,6 +90,11 @@ export default function Dashboard() {
             )}
             <Link href="/curriculum" className="btn btn-secondary" style={{ fontSize: 15 }}>Browse curriculum</Link>
           </div>
+          <div style={{ marginTop: "var(--space-4)", display: "flex", gap: 12, flexWrap: "wrap", fontSize: 13 }}>
+            <Link href="/capstone" style={{ color: "var(--color-accent-700)" }}>🏗 Capstone projects</Link>
+            <Link href="/certificate" style={{ color: "var(--color-accent-700)" }}>🎓 Certificate</Link>
+            <Link href="/notes" style={{ color: "var(--color-accent-700)" }}>📝 My notes</Link>
+          </div>
         </div>
 
         {/* 60-day plan strip */}
@@ -115,7 +122,7 @@ export default function Dashboard() {
             })}
           </div>
           <figcaption style={{ marginTop: "var(--space-3)" }}>
-            filled = lesson complete · outlined = today · days 46–60 begin the advanced track (runs to day {PROGRAM_DAYS})
+            filled = lesson complete · outlined = today · the core track ends day 54; the advanced track runs to day {PROGRAM_DAYS}
           </figcaption>
         </figure>
       </section>
@@ -125,7 +132,7 @@ export default function Dashboard() {
         <h2 style={{ marginBottom: "var(--space-4)" }}>Core — the 0→100% track</h2>
         <ModuleGrid mods={coreModules} allMods={modules} completed={completed} />
         <h2 style={{ margin: "var(--space-8) 0 var(--space-4)" }}>Advanced — beyond the core</h2>
-        <ModuleGrid mods={modules.slice(4)} allMods={modules} completed={completed} />
+        <ModuleGrid mods={modules.slice(5)} allMods={modules} completed={completed} />
       </section>
     </div>
   );

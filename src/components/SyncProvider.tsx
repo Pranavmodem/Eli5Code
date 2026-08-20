@@ -26,6 +26,9 @@ export default function SyncProvider({ children }: { children: React.ReactNode }
   const authReady = useBootcamp((s) => s.authReady);
   const completedLessons = useBootcamp((s) => s.completedLessons);
   const startDate = useBootcamp((s) => s.startDate);
+  const quizResults = useBootcamp((s) => s.quizResults);
+  const passedExercises = useBootcamp((s) => s.passedExercises);
+  const bookmarks = useBootcamp((s) => s.bookmarks);
   const mode = useBootcamp((s) => s.mode);
   const hydrated = useBootcamp((s) => s.hasHydrated);
   const settledFor = useRef<string | null>(null);
@@ -52,7 +55,13 @@ export default function SyncProvider({ children }: { children: React.ReactNode }
 
     fetchUserProgress(authUser.id).then((remote) => {
       const remoteProgress = remote
-        ? { completedLessons: remote.completed_lessons ?? [], startDate: remote.start_date }
+        ? {
+            completedLessons: remote.completed_lessons ?? [],
+            startDate: remote.start_date,
+            quizResults: remote.quiz_results ?? {},
+            passedExercises: remote.passed_exercises ?? [],
+            bookmarks: remote.bookmarks ?? [],
+          }
         : null;
       const remoteEmpty = !remoteProgress?.completedLessons.length;
       const local = useBootcamp.getState();
@@ -86,11 +95,14 @@ export default function SyncProvider({ children }: { children: React.ReactNode }
         completed_lessons: completedLessons,
         start_date: startDate,
         mode,
+        quiz_results: quizResults,
+        passed_exercises: passedExercises,
+        bookmarks,
       });
     }, 800);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated, authReady, authUser?.id, completedLessons, startDate, mode]);
+  }, [hydrated, authReady, authUser?.id, completedLessons, startDate, mode, quizResults, passedExercises, bookmarks]);
 
   return <>{children}</>;
 }

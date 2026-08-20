@@ -49,10 +49,11 @@ reveal.
 - An **advanced track** (modules 5–8: advanced data structures, graph
   algorithms, algorithmic patterns, dynamic programming) continues to day 90
 
-### 📚 The curriculum — 8 modules × 10 lessons
+### 📚 The curriculum — 9 modules, 89 lessons, research-backed order
+0. **Programming Foundations** *(new)* — variables & types, casting, I/O, operators, conditionals, loops, functions & scope, program tracing, and a step-counting preview of Big O
 1. **OOP via Analogies** — classes as blueprints, inheritance as genetics, polymorphism as one message/many answers
 2. **Data Structures** — arrays, dynamic arrays, linked lists, stacks, queues, hash maps, BSTs, graphs
-3. **Algorithms in Motion** — five sorts, two searches, BFS/DFS, the call stack
+3. **Algorithms in Motion** — searches first, then the iterative sorts, then **recursion before merge/quick sort and DFS** (the order they depend on)
 4. **Big O** — growth shapes, the handshake problem, space vs time, amortized analysis
 5. **Advanced Data Structures** — heaps, tries, union-find, segment/Fenwick trees, AVL, LRU, Bloom filters
 6. **Graph Algorithms** — Dijkstra, Bellman-Ford, Floyd–Warshall, toposort, Kruskal/Prim, A*, SCC, max-flow
@@ -60,7 +61,27 @@ reveal.
 8. **Dynamic Programming** — memoization, knapsack, coins, LCS, edit distance, LIS, grid/tree/bitmask DP
 
 Each lesson also carries **Python and JavaScript implementations**, "how devs
-think" approach notes, "where it's used" real-world applications, and a quiz.
+think" approach notes, "where it's used" real-world applications, and a quiz
+whose answers are **saved to your account**.
+
+### ⌨️ Practice — write real code
+Core lessons include a **built-in code editor with an instant test runner**:
+starter code, a task, and unit tests executed in a sandboxed Web Worker in your
+browser (infinite loops are killed after 3s). Passing earns XP and is recorded.
+
+### 📝 Notes, bookmarks, cheatsheets
+A notes box on every lesson (synced per account; local for guests), star-to-
+bookmark, a **Notes page** collecting everything, and a **printable cheatsheet
+per module**.
+
+### 🏗 Capstone & 🎓 certificate
+Three guided capstone projects (task scheduler, autocomplete, grid pathfinder)
+with milestone checklists — and a printable **certificate** that unlocks when
+all 49 core lessons are complete.
+
+### ⚑ Feedback
+A feedback form on every lesson and in the footer (mistake / bug / typo /
+suggestion), readable and resolvable in the Admin console. Guests may submit.
 
 ### 🤖 AI tutor
 A floating ask-anything tutor on every page, answering in ELI5 or Tech style to

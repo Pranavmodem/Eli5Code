@@ -25,14 +25,21 @@ export function summarizeProgress(
   completedLessons: string[],
   startDate: string | null,
   activityDates: string[] = [],
-  now: Date = new Date()
+  now: Date = new Date(),
+  extras: { passedExercises?: string[]; quizResults?: Record<string, number> } = {}
 ): ProgressSummary {
   const done = new Set(completedLessons);
   const coreDone = CORE_LESSONS.filter((l) => done.has(l.id)).length;
   const totalDone = allLessons.filter((l) => done.has(l.id)).length;
 
-  const mastery = Math.min(100, Math.round(coreDone * MASTERY_PER_LESSON * 10) / 10);
-  const xp = totalDone * XP_PER_LESSON;
+  const mastery = Math.min(100, Math.round((coreDone / CORE_LESSONS.length) * 1000) / 10);
+  const quizCorrect = allLessons.filter(
+    (l) => l.q && extras.quizResults?.[l.id] === l.q.x
+  ).length;
+  const xp =
+    totalDone * XP_PER_LESSON +
+    (extras.passedExercises?.length ?? 0) * 15 +
+    quizCorrect * 5;
   const level = Math.floor(xp / 100) + 1;
 
   let calendarDay = 0;

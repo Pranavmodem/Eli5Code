@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useBootcamp } from "@/lib/store";
-import { adminListUsers, AdminUserRow } from "@/lib/supabase";
+import { adminListUsers, AdminUserRow, adminListFeedback, adminResolveFeedback, FeedbackRow } from "@/lib/supabase";
+import { getLesson } from "@/lib/curriculum";
 import { allLessons } from "@/lib/curriculum";
 import { summarizeProgress } from "@/lib/progress";
 
@@ -11,15 +12,20 @@ export default function AdminPage() {
   const authUser = useBootcamp((s) => s.authUser);
   const authReady = useBootcamp((s) => s.authReady);
   const [rows, setRows] = useState<AdminUserRow[] | null>(null);
+  const [feedback, setFeedback] = useState<FeedbackRow[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!authUser?.isAdmin) return;
     setLoading(true);
-    adminListUsers()
-      .then(setRows)
+    Promise.all([adminListUsers().then(setRows), adminListFeedback().then(setFeedback)])
       .finally(() => setLoading(false));
   }, [authUser?.isAdmin]);
+
+  const resolve = async (id: string, resolved: boolean) => {
+    await adminResolveFeedback(id, resolved);
+    setFeedback((fs) => fs.map((f) => (f.id === id ? { ...f, resolved } : f)));
+  };
 
   if (!authReady) return <p className="text-muted" style={{ padding: "var(--space-8)", textAlign: "center" }}>Loading…</p>;
   if (!authUser?.isAdmin) {
@@ -81,6 +87,35 @@ export default function AdminPage() {
             )}
           </tbody>
         </table>
+      </div>
+
+      <h2 style={{ margin: "var(--space-8) 0 var(--space-2)" }}>Feedback</h2>
+      <p className="text-muted" style={{ fontSize: 13.5, marginBottom: "var(--space-4)" }}>
+        Reports from learners — per lesson or site-wide. Resolve them as you fix things.
+        {feedback.length === 0 && " Nothing yet."}
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+        {feedback.map((f) => {
+          const hit = f.lesson_id ? getLesson(f.lesson_id) : null;
+          return (
+            <div key={f.id} className="blueprint" style={{ padding: "var(--space-3) var(--space-4)", opacity: f.resolved ? 0.55 : 1 }}>
+              <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
+              <div style={{ display: "flex", gap: 8, alignItems: "baseline", flexWrap: "wrap", marginBottom: 4 }}>
+                <span className="tag tag-accent" style={{ fontSize: 9 }}>{f.category}</span>
+                <span className="tag tag-outline" style={{ fontSize: 9 }}>
+                  {hit ? `${hit.module.n} · ${hit.lesson.t}` : f.lesson_id ?? "site-wide"}
+                </span>
+                <span className="text-muted mono" style={{ fontSize: 10 }}>
+                  {f.username ? `@${f.username}` : "anonymous"} · {new Date(f.created_at).toLocaleString()}
+                </span>
+                <button className="btn btn-ghost" style={{ marginLeft: "auto", fontSize: 11 }} onClick={() => resolve(f.id, !f.resolved)}>
+                  {f.resolved ? "↺ reopen" : "✓ mark resolved"}
+                </button>
+              </div>
+              <p style={{ margin: 0, fontSize: 13.5, whiteSpace: "pre-wrap", lineHeight: 1.55 }}>{f.body}</p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

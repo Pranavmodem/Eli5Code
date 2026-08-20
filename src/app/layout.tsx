@@ -5,6 +5,7 @@ import NavBar from "@/components/NavBar";
 import AuthProvider from "@/components/AuthProvider";
 import SyncProvider from "@/components/SyncProvider";
 import AskAI from "@/components/AskAI";
+import FeedbackWidget from "@/components/FeedbackWidget";
 
 export const metadata: Metadata = {
   title: "ELI5Code — Zero / Hero Coding Bootcamp",
@@ -23,9 +24,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <AskAI />
             <footer
               className="text-muted"
-              style={{ borderTop: "1px solid var(--color-divider)", padding: "var(--space-6) var(--space-8)", fontSize: 12, textAlign: "center" }}
+              style={{ borderTop: "1px solid var(--color-divider)", padding: "var(--space-6) var(--space-8)", fontSize: 12, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}
             >
-              ELI5Code · ZERO / HERO · 60 days — 2 hours a day — 0 to 100%
+              <span>ELI5Code · ZERO / HERO · 60 days — 2 hours a day — 0 to 100%</span>
+              <FeedbackWidget label="Feedback about the site" />
             </footer>
           </SyncProvider>
         </AuthProvider>

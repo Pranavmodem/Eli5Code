@@ -1,6 +1,8 @@
 // Visualizer access layer: 80 step-scripts (one per lesson) from the data
 // modules, plus the code samples and applied notes keyed alongside them.
 // @ts-ignore untyped data module
+import { VIZ_OF_M0, FAMILY_M0, TITLE_M0, buildM0 } from "@/data/visualizers-m0";
+// @ts-ignore untyped data module
 import { VIZ_OF, FAMILY, TITLE, CODE, buildFrames } from "@/data/visualizers";
 // @ts-ignore untyped data module
 import { VIZ_OF_ADV, FAMILY_ADV, TITLE_ADV, buildAdv } from "@/data/visualizers-adv";
@@ -35,20 +37,24 @@ export interface LessonViz {
 }
 
 export function vizForLesson(lessonId: string): LessonViz | null {
+  const m0Key = (VIZ_OF_M0 as Record<string, string>)[lessonId];
   const coreKey = (VIZ_OF as Record<string, string>)[lessonId];
   const advKey = (VIZ_OF_ADV as Record<string, string>)[lessonId];
-  const key = coreKey ?? advKey;
+  const key = m0Key ?? coreKey ?? advKey;
   if (!key) return null;
   try {
-    const frames: Frame[] = (coreKey ? buildFrames(key) : buildAdv(key)) ?? [];
+    const frames: Frame[] =
+      (m0Key ? buildM0(key) : coreKey ? buildFrames(key) : buildAdv(key)) ?? [];
     if (!frames?.length) return null;
     return {
       key,
       family:
+        (FAMILY_M0 as Record<string, string>)[key] ??
         (FAMILY as Record<string, string>)[key] ??
         (FAMILY_ADV as Record<string, string>)[key] ??
         "unknown",
       title:
+        (TITLE_M0 as Record<string, string>)[key] ??
         (TITLE as Record<string, string>)[key] ??
         (TITLE_ADV as Record<string, string>)[key] ??
         "Watch it happen",

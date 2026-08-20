@@ -11,6 +11,7 @@ const links = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/curriculum", label: "Curriculum" },
   { href: "/today", label: "Today's session" },
+  { href: "/notes", label: "Notes" },
 ];
 
 export default function NavBar() {
@@ -19,6 +20,8 @@ export default function NavBar() {
   const completedLessons = useBootcamp((s) => s.completedLessons);
   const startDate = useBootcamp((s) => s.startDate);
   const activityDates = useBootcamp((s) => s.activityDates);
+  const passedExercises = useBootcamp((s) => s.passedExercises);
+  const quizResults = useBootcamp((s) => s.quizResults);
   const theme = useBootcamp((s) => s.theme);
   const toggleTheme = useBootcamp((s) => s.toggleTheme);
   const authUser = useBootcamp((s) => s.authUser);
@@ -32,7 +35,9 @@ export default function NavBar() {
   const s = summarizeProgress(
     hydrated ? completedLessons : [],
     hydrated ? startDate : null,
-    hydrated ? activityDates : []
+    hydrated ? activityDates : [],
+    new Date(),
+    hydrated ? { passedExercises, quizResults } : {}
   );
   return (
     <header
